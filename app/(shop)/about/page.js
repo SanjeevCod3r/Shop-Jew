@@ -105,7 +105,7 @@ export default function AboutPage() {
             <div className="w-full lg:w-1/2 relative group anim-enter-up">
               <div className="aspect-[4/5] rounded-[24px] md:rounded-[40px] overflow-hidden shadow-2xl relative z-10">
                 <Image
-                  src="/imageS/Contact.jpeg"
+                  src="/images/Contact.jpeg"
                   alt="Our Founder's Vision"
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-700"
