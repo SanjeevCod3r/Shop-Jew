@@ -13,6 +13,30 @@ const ProductSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  sku: {
+    type: String,
+    default: '',
+  },
+  ringSizes: {
+    type: [Number],
+    default: [],
+  },
+  stone: {
+    type: String,
+    default: '',
+  },
+  material: {
+    type: String,
+    default: '',
+  },
+  design: {
+    type: String,
+    default: '',
+  },
+  set: {
+    type: String,
+    default: '',
+  },
   images: {
     type: [String],
     default: [],

@@ -1,13 +1,13 @@
-import { Inter } from 'next/font/google'
-import './globals.css'
-import { Toaster } from 'sonner'
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { Toaster } from "sonner";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: 'PremiumStore - E-commerce Platform',
-  description: 'Your one-stop shop for premium products at great prices',
-}
+  title: "LuxeLoom - Premium Jewelry",
+  description: "Exquisite handcrafted jewelry for every occasion.",
+};
 
 export default function RootLayout({ children }) {
   return (
@@ -17,5 +17,5 @@ export default function RootLayout({ children }) {
         <Toaster position="top-right" richColors />
       </body>
     </html>
-  )
+  );
 }

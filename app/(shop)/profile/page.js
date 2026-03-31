@@ -15,7 +15,7 @@ import { User, Package, ArrowLeft, Edit, Save } from 'lucide-react'
 
 export default function ProfilePage() {
   const router = useRouter()
-  const { user, token, setAuth, logout } = useAuthStore()
+  const { user, token, setAuth, logout, hydrated } = useAuthStore()
   const [profile, setProfile] = useState(null)
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
@@ -33,13 +33,15 @@ export default function ProfilePage() {
   })
 
   useEffect(() => {
+    if (!hydrated) return;
+
     if (!token) {
       router.push('/login')
       return
     }
     fetchProfile()
     fetchOrders()
-  }, [])
+  }, [hydrated, token, router]);
 
   const fetchProfile = async () => {
     try {

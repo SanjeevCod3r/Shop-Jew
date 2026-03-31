@@ -15,14 +15,17 @@ const CartItemSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  size: {
+    type: String,
+    default: null,
+  },
 });
 
 const CartSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
-    unique: true,
+    required: false,
   },
   items: [CartItemSchema],
   updatedAt: {

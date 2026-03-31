@@ -13,7 +13,7 @@ import { ArrowLeft, CreditCard, Shield, Tag, X } from 'lucide-react'
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { user, token } = useAuthStore()
+  const { user, token, hydrated } = useAuthStore()
   const { clearCart } = useCartStore()
   const [cart, setCart] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -33,13 +33,15 @@ export default function CheckoutPage() {
   })
 
   useEffect(() => {
+    if (!hydrated) return;
+
     if (!token) {
-      router.push('/login')
-      return
+      router.push('/login');
+      return;
     }
-    fetchCart()
-    loadRazorpayScript()
-  }, [])
+    fetchCart();
+    loadRazorpayScript();
+  }, [hydrated, token, router]);
 
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
@@ -169,7 +171,8 @@ export default function CheckoutPage() {
                     title: item.productId.title,
                     price: item.price,
                     quantity: item.quantity,
-                    image: item.productId.images[0]
+                    image: item.productId.images[0],
+                    size: item.size || null
                   })),
                   totalAmount: total,
                   discount: discount,
@@ -248,7 +251,7 @@ export default function CheckoutPage() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+        <h1 className="text-4xl text-[#2A4537] font-bold mb-8">Checkout</h1>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Shipping Address */}
@@ -350,6 +353,11 @@ export default function CheckoutPage() {
                     <div className="flex-1">
                       <h4 className="font-semibold">{item.productId?.title}</h4>
                       <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                      {item.size && (
+                        <span className="inline-block text-xs font-bold bg-[#2A4537] text-white px-2 py-0.5 rounded-full mt-1">
+                          Size: {item.size}
+                        </span>
+                      )}
                     </div>
                     <div className="text-right">
                       <p className="font-bold">₹{item.price * item.quantity}</p>
@@ -389,13 +397,13 @@ export default function CheckoutPage() {
                       </Button>
                     </div>
                   ) : (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center justify-between">
+                    <div className="bg-[#C5A028] border border-[#C5A028] rounded-lg p-3 flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Tag className="h-4 w-4 text-green-600" />
+                        <Tag className="h-4 w-4 text-white" />
                         <div>
-                          <p className="font-semibold text-green-800">{appliedCoupon.code}</p>
+                          <p className="font-semibold text-white">{appliedCoupon.code}</p>
                           {appliedCoupon.description && (
-                            <p className="text-xs text-green-600">{appliedCoupon.description}</p>
+                            <p className="text-xs text-white">{appliedCoupon.description}</p>
                           )}
                         </div>
                       </div>
@@ -413,28 +421,28 @@ export default function CheckoutPage() {
 
                 <div className="border-t pt-4 space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Subtotal</span>
+                    <span className="text-black">Subtotal</span>
                     <span className="font-semibold">₹{total}</span>
                   </div>
                   {discount > 0 && (
-                    <div className="flex justify-between text-green-600">
+                    <div className="flex justify-between text-[#C5A028]">
                       <span>Discount</span>
                       <span className="font-semibold">-₹{discount}</span>
                     </div>
                   )}
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Shipping</span>
+                    <span className="text-black">Shipping</span>
                     <span className="font-semibold text-green-600">FREE</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Tax</span>
+                    <span className="text-black">Tax</span>
                     <span className="font-semibold">₹0</span>
                   </div>
                 </div>
                 <div className="border-t pt-4">
                   <div className="flex justify-between text-lg">
                     <span className="font-bold">Total</span>
-                    <span className="font-bold text-blue-600">₹{total - discount}</span>
+                    <span className="font-bold text-black">₹{total - discount}</span>
                   </div>
                 </div>
                 <div className="bg-blue-50 p-3 rounded-lg flex items-start gap-2">
@@ -446,7 +454,7 @@ export default function CheckoutPage() {
               </CardContent>
               <CardFooter>
                 <Button
-                  className="w-full bg-blue-600 hover:bg-blue-700 gap-2"
+                  className="w-full bg-[#C5A028] hover:bg-[#C5A028] gap-2"
                   onClick={handlePayment}
                   disabled={processing}
                 >

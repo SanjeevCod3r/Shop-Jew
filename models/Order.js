@@ -10,13 +10,17 @@ const OrderItemSchema = new mongoose.Schema({
   price: Number,
   quantity: Number,
   image: String,
+  size: {
+    type: String,
+    default: null,
+  },
 });
 
 const OrderSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
+    required: false,
   },
   items: [OrderItemSchema],
   totalAmount: {
