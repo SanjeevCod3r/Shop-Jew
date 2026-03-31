@@ -2,6 +2,13 @@ const nextConfig = {
   output: 'standalone',
   images: {
     unoptimized: true,
+    domains: ['via.placeholder.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
   },
   experimental: {
     // Remove if not using Server Components

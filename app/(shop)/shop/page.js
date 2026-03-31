@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ChevronRight, Star, ShoppingBag, ArrowLeft, Filter, Grid, List } from 'lucide-react'
 import { useAuthStore, useCartStore } from '@/lib/store'
 import { toast } from 'sonner'
@@ -192,9 +193,11 @@ export default function ShopPage() {
 
                       {/* Image Container */}
                       <div className="aspect-square bg-gray-50/50 rounded-2xl mb-6 flex items-center justify-center p-8 overflow-hidden relative">
-                        <img
+                        <Image
                           src={p.images[0] || 'https://via.placeholder.com/400'}
                           alt={p.title}
+                          width={200}
+                          height={200}
                           className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110"
                         />
                       </div>

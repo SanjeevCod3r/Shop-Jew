@@ -326,9 +326,11 @@ export default function App() {
                 className="bg-white rounded-[20px] border border-gray-100 p-6 flex flex-col group transition-all hover:shadow-xl relative overflow-hidden"
               >
                 <div className="relative aspect-square mb-6 overflow-hidden flex items-center justify-center">
-                  <img
+                  <Image
                     src={item.images[0] || "https://via.placeholder.com/400"}
                     alt={item.title}
+                    width={200}
+                    height={200}
                     className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
@@ -470,9 +472,11 @@ export default function App() {
                 className="bg-white rounded-[20px] border border-gray-100 p-6 flex flex-col group transition-all hover:shadow-xl relative overflow-hidden"
               >
                 <div className="relative aspect-square mb-6 overflow-hidden flex items-center justify-center">
-                  <img
+                  <Image
                     src={item.images[0] || "https://via.placeholder.com/400"}
                     alt={item.title}
+                    width={200}
+                    height={200}
                     className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
