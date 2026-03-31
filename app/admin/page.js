@@ -2106,7 +2106,7 @@ export default function AdminPage() {
                     <DialogDescription className="text-[#C5A028] text-[13px] font-black uppercase tracking-[0.4em] opacity-80">
                       {editingBlog
                         ? "Updating the details of this brand editorial"
-                        : "Composing a new chapter in the LuxeLoom legacy"}
+                        : "Composing a new chapter in the Cezore legacy"}
                     </DialogDescription>
                   </DialogHeader>
                   <div className="p-12 space-y-10">

@@ -192,7 +192,7 @@ export default function BlogPostDetail() {
                 )}
 
                 <p>
-                  In the vast landscape of artisanal jewelry, LuxeLoom continues
+                  In the vast landscape of artisanal jewelry, Cezore continues
                   to define standards that transcend trends. We believe that
                   true luxury is not just seen, but felt—through the precision
                   of a master's touch and the clarity of a flawlessly cut stone.

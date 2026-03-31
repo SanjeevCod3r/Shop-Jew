@@ -7,28 +7,28 @@ import { Gem, Sparkles, Heart, ShieldCheck, ArrowRight } from "lucide-react";
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-[#fcfcfc] font-sans text-gray-800">
+    <div className="min-h-screen bg-[#fcfcfc] font-sans text-gray-800 overflow-x-hidden">
       {/* 1. Hero Section - Immersive Luxury */}
-      <section className="relative h-[80vh] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[72vh] md:h-[80vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
             src="/images/about.jpeg"
-            alt="LuxeLoom Heritage Header"
+            alt="Cezore Heritage Header"
             fill
-            className="object-cover scale-105 animate-in fade-in duration-1000"
+            className="object-cover scale-105 anim-enter-up"
             priority
           />
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
         </div>
 
-        <div className="container mx-auto px-4 relative z-10 text-center text-white">
-          <span className="text-gold uppercase tracking-[0.6em] text-sm font-bold mb-6 block animate-in slide-in-from-bottom duration-700">
+        <div className="container mx-auto px-4 relative z-10 text-center text-white stagger-children">
+          <span className="text-gold uppercase tracking-[0.25em] sm:tracking-[0.45em] md:tracking-[0.6em] text-[10px] md:text-sm font-bold mb-4 md:mb-6 block">
             Established 1994
           </span>
-          <h1 className="text-5xl md:text-8xl font-bold mb-8 leading-[1.1] tracking-tighter animate-in slide-in-from-bottom duration-1000 delay-200">
+          <h1 className="text-3xl sm:text-4xl md:text-8xl font-bold mb-5 md:mb-8 leading-[1.1] tracking-tighter">
             A Legacy of <br /> Timeless Elegance
           </h1>
-          <p className="max-w-2xl mx-auto text-lg md:text-xl text-gray-200 font-light leading-relaxed animate-in slide-in-from-bottom duration-1000 delay-300">
+          <p className="max-w-2xl mx-auto text-base md:text-xl text-gray-200 font-light leading-relaxed">
             Crafting more than just jewelry—we weave stories of love, heritage,
             and uncompromising beauty into every hand-selected gemstone.
           </p>
@@ -36,18 +36,18 @@ export default function AboutPage() {
       </section>
 
       {/* 2. Our Narrative - Elegant Storytelling */}
-      <section className="py-24 bg-white overflow-hidden">
+      <section className="py-16 md:py-24 bg-white overflow-hidden">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
-            <div className="w-full lg:w-1/2 space-y-12 animate-in slide-in-from-left duration-1000">
+          <div className="flex flex-col lg:flex-row items-center gap-10 md:gap-16 lg:gap-24">
+            <div className="w-full lg:w-1/2 space-y-8 md:space-y-12 anim-enter-up">
               <div className="space-y-6">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 md:gap-4">
                   <div className="h-px w-12 bg-gold"></div>
-                  <h3 className="text-gold uppercase tracking-[0.4em] font-black text-xs">
+                  <h3 className="text-gold uppercase tracking-[0.22em] md:tracking-[0.4em] font-black text-[10px] md:text-xs">
                     The Cezore Legacy
                   </h3>
                 </div>
-                <h2 className="text-5xl md:text-6xl font-bold text-gray-900 leading-[1.1] tracking-tight">
+                <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold text-gray-900 leading-[1.1] tracking-tight">
                   Born from a passion <br /> 
                   for <span className="text-[#2A4736] relative inline-block">
                     natural brilliance
@@ -59,14 +59,14 @@ export default function AboutPage() {
               </div>
               
               <div className="space-y-8">
-                <div className="relative pl-8 border-l-2 border-gold/20">
-                  <p className="text-xl text-gray-600 font-light italic leading-relaxed">
+                <div className="relative pl-5 md:pl-8 border-l-2 border-gold/20">
+                  <p className="text-base md:text-xl text-gray-600 font-light italic leading-relaxed">
                     "Luxury at Cezore isn't just a price tag; it's a standard of 
                     unwavering excellence passed down through generations."
                   </p>
                 </div>
                 
-                <div className="space-y-6 text-gray-600 text-lg leading-relaxed font-light">
+                <div className="space-y-6 text-gray-600 text-base md:text-lg leading-relaxed font-light">
                   <p>
                     Founded over three decades ago, our journey began in a 
                     sequestered boutique focused on rare pearls and vintage 
@@ -84,13 +84,13 @@ export default function AboutPage() {
               </div>
 
               {/* Enhanced Stats Grid */}
-              <div className="grid grid-cols-3 gap-4 pt-8">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 md:pt-8">
                 {[
                   { label: "Years Experience", value: "30+" },
                   { label: "Clients Worldwide", value: "10k+" },
                   { label: "Ethical Sourcing", value: "100%" }
                 ].map((stat, i) => (
-                  <div key={i} className="group p-6 rounded-3xl bg-gray-50 border border-gray-100 hover:bg-[#2A4736] hover:border-[#2A4736] transition-all duration-500 hover:-translate-y-1">
+                  <div key={i} className="group p-5 md:p-6 rounded-3xl bg-gray-50 border border-gray-100 hover:bg-[#2A4736] hover:border-[#2A4736] transition-all duration-500 hover:-translate-y-1 anim-hover-lift">
                     <div className="text-2xl font-bold text-[#2A4736] group-hover:text-gold transition-colors mb-2">
                       {stat.value}
                     </div>
@@ -102,10 +102,10 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="w-full lg:w-1/2 relative group">
-              <div className="aspect-[4/5] rounded-[40px] overflow-hidden shadow-2xl relative z-10 animate-in slide-in-from-right duration-1000">
+            <div className="w-full lg:w-1/2 relative group anim-enter-up">
+              <div className="aspect-[4/5] rounded-[24px] md:rounded-[40px] overflow-hidden shadow-2xl relative z-10">
                 <Image
-                  src="https://images.unsplash.com/photo-1573408302355-4e0b7cb3982e?auto=format&fit=crop&q=80&w=800"
+                  src="/imageS/Contact.jpeg"
                   alt="Our Founder's Vision"
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-700"
@@ -120,24 +120,24 @@ export default function AboutPage() {
       </section>
 
       {/* 3. Artisan Section - Deep Mood */}
-      <section className="bg-[#1d3526] py-24 text-white">
+      <section className="bg-[#1d3526] py-14 md:py-24 text-white">
         <div className="container mx-auto px-4 flex flex-col items-center text-center">
-          <div className="max-w-3xl space-y-6 mb-16 animate-in slide-in-from-bottom duration-700">
+          <div className="max-w-3xl space-y-6 mb-16 anim-enter-up">
             <div className="flex justify-center mb-6">
               <Sparkles className="h-10 w-10 text-[#C5A028] opacity-80" />
             </div>
-            <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-[#C5A028]">
+            <h2 className="text-3xl md:text-6xl font-bold tracking-tight text-[#C5A028]">
               The Heartbeat <br /> of Craftsmanship
             </h2>
-            <p className="text-gray-400 text-lg md:text-xl font-light">
-              Behind every LuxeLoom piece is a collective of master artisans who
+            <p className="text-gray-400 text-base md:text-xl font-light">
+              Behind every Cezore piece is a collective of master artisans who
               have dedicated their lives to the art of fine jewelry. We honor
               traditional techniques while embracing modern innovation.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
-            <div className="space-y-6 animate-in slide-in-from-bottom duration-1000 delay-100">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 w-full stagger-children">
+            <div className="space-y-6 anim-hover-lift">
               <div className="aspect-square rounded-[32px] overflow-hidden relative border-2 border-white/5 p-2">
                 <div className="w-full h-full rounded-[24px] overflow-hidden relative">
                   <Image
@@ -154,7 +154,7 @@ export default function AboutPage() {
                 for color, clarity, and ethical origin.
               </p>
             </div>
-            <div className="space-y-6 animate-in slide-in-from-bottom duration-1000 delay-200">
+            <div className="space-y-6 anim-hover-lift">
               <div className="aspect-square rounded-[32px] overflow-hidden relative border-2 border-white/5 p-2">
                 <div className="w-full h-full rounded-[24px] overflow-hidden relative">
                   <Image
@@ -171,7 +171,7 @@ export default function AboutPage() {
                 high-pressure environments for zero flaws.
               </p>
             </div>
-            <div className="space-y-6 animate-in slide-in-from-bottom duration-1000 delay-300">
+            <div className="space-y-6 anim-hover-lift">
               <div className="aspect-square rounded-[32px] overflow-hidden relative border-2 border-white/5 p-2">
                 <div className="w-full h-full rounded-[24px] overflow-hidden relative">
                   <Image
@@ -193,18 +193,18 @@ export default function AboutPage() {
       </section>
 
       {/* 4. Brand Values - High-End Grid */}
-      <section className="py-24 bg-[#f9fafb]">
+      <section className="py-14 md:py-24 bg-[#f9fafb]">
         <div className="container mx-auto px-4">
-          <div className="text-center space-y-4 mb-20">
-            <h3 className="text-[#2A4537] uppercase tracking-[0.4em] font-black text-xs">
+          <div className="text-center space-y-3 md:space-y-4 mb-12 md:mb-20">
+            <h3 className="text-[#2A4537] uppercase tracking-[0.2em] md:tracking-[0.4em] font-black text-[10px] md:text-xs">
               Our Commitment
             </h3>
-            <h2 className="text-5xl font-bold text-[#2A4537]">
+            <h2 className="text-3xl md:text-5xl font-bold text-[#2A4537]">
               Why Choose Cezore?
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-8 stagger-children">
             {[
               {
                 icon: Heart,
@@ -229,7 +229,7 @@ export default function AboutPage() {
             ].map((item, idx) => (
               <div
                 key={idx}
-                className="bg-white p-10 rounded-[32px] border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 group hover:-translate-y-2"
+                className="bg-white p-6 md:p-10 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 group hover:-translate-y-2 anim-hover-lift"
               >
                 <div className="h-14 w-14 rounded-2xl bg-gray-50 flex items-center justify-center mb-6 group-hover:bg-[#2A4736] transition-colors">
                   <item.icon className="h-7 w-7 text-[#2A4736] group-hover:text-white transition-colors" />
@@ -247,20 +247,20 @@ export default function AboutPage() {
       </section>
 
       {/* 5. CTA Section - Direct and Clean */}
-      <section className="py-32 bg-white relative overflow-hidden">
+      <section className="py-16 md:py-32 bg-white relative overflow-hidden">
         <div className="container mx-auto px-4 text-center">
-          <div className="max-w-3xl mx-auto space-y-10 animate-in slide-in-from-bottom duration-1000">
-            <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-[#2A4537]">
+          <div className="max-w-3xl mx-auto space-y-10 anim-enter-up">
+            <h2 className="text-3xl md:text-7xl font-bold tracking-tighter text-[#2A4537]">
               Experience Excellence.
             </h2>
-            <p className="text-gray-500 text-xl font-light">
+            <p className="text-gray-500 text-base md:text-xl font-light">
               Join thousands of discerning individuals who trust us with their
               most precious moments.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-6">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6 pt-5 md:pt-6">
               <Link
                 href="/shop"
-                className="bg-[#2A4736] text-white px-10 py-5 rounded-full font-bold text-[16px] shadow-2xl hover:bg-[#1d3526] transition-all flex items-center gap-3 active:scale-95 group"
+                className="bg-[#2A4736] text-white px-6 md:px-10 py-4 md:py-5 rounded-full font-bold text-[13px] md:text-[16px] shadow-2xl hover:bg-[#1d3526] transition-all flex items-center gap-2 md:gap-3 active:scale-95 group"
               >
                 Shop Latest Collection
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-2 transition-transform" />

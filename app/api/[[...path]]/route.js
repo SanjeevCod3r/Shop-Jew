@@ -6,6 +6,7 @@ import Blog from '@/models/Blog';
 import Cart from '@/models/Cart';
 import Order from '@/models/Order';
 import Coupon from '@/models/Coupon';
+import Inquiry from '@/models/Inquiry';
 import { hashPassword, comparePassword, generateToken, getUserFromRequest } from '@/lib/auth';
 import crypto from 'crypto';
 import Razorpay from 'razorpay';
@@ -79,7 +80,16 @@ export async function GET(request, { params }) {
 
       let query = { price: { $gte: minPrice, $lte: maxPrice } };
       if (search) query.$or = [{ title: { $regex: search, $options: 'i' } }, { description: { $regex: search, $options: 'i' } }];
-      if (category) query.category = category;
+      if (category) {
+        const normalizedCategory = category.trim();
+        const singular = normalizedCategory.replace(/s$/i, '');
+        const plural = `${singular}s`;
+        // Match category ignoring case and singular/plural differences (e.g., Bracelet/Bracelets)
+        query.category = {
+          $regex: `^(${singular}|${plural})$`,
+          $options: 'i',
+        };
+      }
 
       const total = await Product.countDocuments(query);
       const products = await Product.find(query).skip((page - 1) * limit).limit(limit).sort({ createdAt: -1 });
@@ -330,6 +340,28 @@ export async function POST(request, { params }) {
         const blog = await Blog.create(body);
         return NextResponse.json({ message: 'Blog created', blog }, { status: 201 });
       })(request, { params });
+    }
+
+    if (path === 'inquiries') {
+      const { name, email, subject, message } = body;
+      if (!name || !email || !message) {
+        return NextResponse.json(
+          { error: 'Name, email, and message are required' },
+          { status: 400 }
+        );
+      }
+
+      const inquiry = await Inquiry.create({
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        subject: subject?.trim() || 'General Consultation',
+        message: message.trim(),
+      });
+
+      return NextResponse.json(
+        { message: 'Inquiry submitted successfully', inquiry },
+        { status: 201 }
+      );
     }
 
     return NextResponse.json({ error: 'Endpoint not found' }, { status: 404 });

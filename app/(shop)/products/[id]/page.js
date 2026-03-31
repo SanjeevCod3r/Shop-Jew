@@ -326,7 +326,7 @@ export default function ProductDetailPage() {
                   <p>{product.description}</p>
                   <p>
                     Exquisite craftsmanship meets timeless design. This piece is
-                    specifically curated from our LuxeLoom collection to bring a
+                    specifically curated from our Cezore collection to bring a
                     touch of sophistication to your jewelry ensemble.
                   </p>
                 </>

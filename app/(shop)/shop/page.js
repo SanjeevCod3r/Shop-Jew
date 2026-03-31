@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { ChevronRight, Star, ShoppingBag, ArrowLeft, Filter, Grid, List } from 'lucide-react'
 import { useAuthStore, useCartStore } from '@/lib/store'
@@ -17,6 +17,9 @@ export default function ShopPage() {
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState('All')
+  const [sortBy, setSortBy] = useState('latest')
+  const [maxPriceLimit, setMaxPriceLimit] = useState(50000)
+  const [selectedMaxPrice, setSelectedMaxPrice] = useState(50000)
 
   useEffect(() => {
     fetchData()
@@ -25,7 +28,9 @@ export default function ShopPage() {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const url = selectedCategory === 'All' ? '/api/products?limit=40' : `/api/products?category=${selectedCategory}&limit=40`
+      const url = selectedCategory === 'All'
+        ? '/api/products?limit=80'
+        : `/api/products?category=${encodeURIComponent(selectedCategory)}&limit=80`
       const [prodRes, catRes] = await Promise.all([
         fetch(url),
         fetch('/api/categories')
@@ -33,14 +38,31 @@ export default function ShopPage() {
       const prodData = await prodRes.json()
       const catData = await catRes.json()
 
-      setProducts(prodData.products || [])
+      const fetchedProducts = prodData.products || []
+      setProducts(fetchedProducts)
       setCategories(['All', ...(catData.categories || [])])
+      const computedMax = Math.max(50000, ...fetchedProducts.map((p) => Number(p.price) || 0))
+      setMaxPriceLimit(computedMax)
+      setSelectedMaxPrice(computedMax)
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
       setLoading(false)
     }
   }
+
+  const filteredProducts = useMemo(() => {
+    const byPrice = products.filter((p) => (Number(p.price) || 0) <= selectedMaxPrice)
+    const sorted = [...byPrice]
+
+    if (sortBy === 'price-low-high') {
+      sorted.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0))
+    } else if (sortBy === 'price-high-low') {
+      sorted.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0))
+    }
+
+    return sorted
+  }, [products, selectedMaxPrice, sortBy])
 
   const addToCart = async (e, productId) => {
     e.preventDefault()
@@ -73,10 +95,10 @@ export default function ShopPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <div className="min-h-screen bg-gray-50/50 overflow-x-hidden">
 
       {/* Breadcrumb Section */}
-      <div className="bg-gray-50 border-b py-6">
+      <div className="bg-gray-50 border-b py-4 md:py-6">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center gap-2 text-sm text-gray-400">
             <Link href="/" className="hover:text-black">Home</Link>
@@ -86,13 +108,13 @@ export default function ShopPage() {
         </div>
       </div>
 
-      <main className="container mx-auto px-4 lg:px-8 py-10">
+      <main className="container mx-auto px-4 lg:px-8 py-6 md:py-10">
 
-        <div className="flex flex-col lg:flex-row gap-10">
+        <div className="flex flex-col lg:flex-row gap-6 md:gap-10">
 
           {/* Sidebar Filters */}
           <aside className="w-full lg:w-72 flex-shrink-0">
-            <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm sticky top-32">
+            <div className="bg-white rounded-3xl p-5 md:p-8 border border-gray-100 shadow-sm lg:sticky lg:top-32">
               <div className="flex items-center gap-2 mb-8 border-b border-gray-50 pb-4">
                 <Filter className="h-5 w-5 text-[#2A4736]" />
                 <h3 className="font-bold text-lg text-gray-900">Filters</h3>
@@ -121,10 +143,18 @@ export default function ShopPage() {
                 <div className="pt-6 border-t border-gray-50">
                   <h4 className="font-bold text-sm text-gray-900 mb-4 uppercase tracking-widest">Price Range</h4>
                   <div className="space-y-4">
-                    <input type="range" className="w-full accent-[#2A4736]" min="0" max="50000" />
+                    <input
+                      type="range"
+                      className="w-full accent-[#2A4736]"
+                      min="0"
+                      max={maxPriceLimit}
+                      step="500"
+                      value={selectedMaxPrice}
+                      onChange={(e) => setSelectedMaxPrice(Number(e.target.value))}
+                    />
                     <div className="flex items-center justify-between text-xs font-bold text-gray-400">
                       <span>₹0</span>
-                      <span>₹50,000+</span>
+                      <span>₹{selectedMaxPrice.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
@@ -136,19 +166,22 @@ export default function ShopPage() {
           <div className="flex-1">
 
             {/* Toolbar */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-10 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-              <div className="text-sm font-medium text-gray-500">
-                Showing <span className="text-black font-bold">{products.length}</span> results for <span className="text-[#2A4736] font-bold">"{selectedCategory}"</span>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 md:gap-4 mb-6 md:mb-10 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+              <div className="text-xs sm:text-sm font-medium text-gray-500">
+                Showing <span className="text-black font-bold">{filteredProducts.length}</span> results for <span className="text-[#2A4736] font-bold">"{selectedCategory}"</span>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 md:gap-3 w-full sm:w-auto overflow-x-auto">
                 <button className="p-2 rounded-lg bg-gray-100 text-[#2A4736]"><Grid className="h-5 w-5" /></button>
                 <button className="p-2 rounded-lg hover:bg-gray-50 text-gray-400"><List className="h-5 w-5" /></button>
-                <span className="h-6 w-[1px] bg-gray-200 mx-2"></span>
-                <select className="bg-transparent text-sm font-bold border-none focus:ring-0 cursor-pointer">
-                  <option>Latest Arrivals</option>
-                  <option>Price: Low to High</option>
-                  <option>Price: High to Low</option>
-                  <option>Best Rating</option>
+                <span className="h-6 w-[1px] bg-gray-200 mx-1 md:mx-2"></span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-transparent text-sm font-bold border-none focus:ring-0 cursor-pointer min-w-[150px]"
+                >
+                  <option value="latest">Latest Arrivals</option>
+                  <option value="price-low-high">Price: Low to High</option>
+                  <option value="price-high-low">Price: High to Low</option>
                 </select>
               </div>
             </div>
@@ -168,30 +201,34 @@ export default function ShopPage() {
                   </div>
                 ))}
               </div>
-            ) : products.length === 0 ? (
-              <div className="bg-white rounded-3xl p-20 text-center border border-gray-100 shadow-sm">
+            ) : filteredProducts.length === 0 ? (
+              <div className="bg-white rounded-3xl p-8 md:p-20 text-center border border-gray-100 shadow-sm">
                 <div className="h-20 w-20 rounded-full bg-gray-50 flex items-center justify-center mx-auto mb-6">
                   <ShoppingBag className="h-10 w-10" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">No products found</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">No products found</h3>
                 <p className="text-gray-500 mb-8 max-w-sm mx-auto">We couldn't find any items matching your selected filters. Try broadening your criteria or reset filters.</p>
                 <Button
                   className="bg-[#2A4736] hover:bg-[#1f3628] rounded-full px-8 py-6"
-                  onClick={() => setSelectedCategory('All')}
+                  onClick={() => {
+                    setSelectedCategory('All')
+                    setSortBy('latest')
+                    setSelectedMaxPrice(maxPriceLimit)
+                  }}
                 >Reset Filters</Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-                {products.map((p) => (
+              <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-8">
+                {filteredProducts.map((p) => (
                   <Link href={`/product/${p._id}`} key={p._id} className="group">
-                    <div className="bg-white rounded-[32px] p-6 border border-gray-200/50 transition-all duration-500 hover:shadow-2xl hover:border-transparent hover:-translate-y-2 flex flex-col h-full overflow-hidden relative">
+                    <div className="bg-white rounded-[22px] md:rounded-[32px] p-3 sm:p-4 md:p-6 border border-gray-200/50 transition-all duration-500 hover:shadow-2xl hover:border-transparent hover:-translate-y-2 flex flex-col h-full overflow-hidden relative">
                       {/* Badge */}
                       {Math.random() > 0.8 && (
                         <div className="absolute top-6 left-6 z-10 bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg">SALE</div>
                       )}
 
                       {/* Image Container */}
-                      <div className="aspect-square bg-gray-50/50 rounded-2xl mb-6 flex items-center justify-center p-8 overflow-hidden relative">
+                      <div className="aspect-square bg-gray-50/50 rounded-2xl mb-3 md:mb-6 flex items-center justify-center p-3 sm:p-5 md:p-8 overflow-hidden relative">
                         <img
                           src={p.images[0] || 'https://via.placeholder.com/400'}
                           alt={p.title}
@@ -201,18 +238,18 @@ export default function ShopPage() {
 
                       {/* Content */}
                       <div className="mb-2">
-                        <div className="flex items-center gap-1 mb-2">
+                        <div className="hidden sm:flex items-center gap-1 mb-2">
                           {[...Array(5)].map((_, i) => (
                             <Star key={i} className="h-4 w-5 fill-[#FFB800] text-[#FFB800]" />
                           ))}
                         </div>
-                        <h3 className="font-bold text-lg text-[#2A4537] group-hover:text-[#2A4736] transition-colors line-clamp-2 leading-snug mb-1">{p.title}</h3>
-                        <p className="text-xs font-bold text-[#C5A028] uppercase tracking-widest">{p.stone || p.category}</p>
+                        <h3 className="font-bold text-base md:text-lg text-[#2A4537] group-hover:text-[#2A4736] transition-colors line-clamp-2 leading-snug mb-1">{p.title}</h3>
+                        <p className="text-[10px] sm:text-xs font-bold text-[#C5A028] uppercase tracking-wide sm:tracking-widest">{p.stone || p.category}</p>
                       </div>
 
                       {/* Price & Action */}
-                      <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50 ">
-                        <span className="text-2xl font-bold text-[#2A4537]">₹{p.price.toLocaleString()}</span>
+                      <div className="flex items-center justify-between mt-auto pt-3 md:pt-4 border-t border-gray-50 ">
+                        <span className="text-base sm:text-lg md:text-2xl font-bold text-[#2A4537]">₹{p.price.toLocaleString()}</span>
                         <button
                           onClick={(e) => addToCart(e, p._id)}
                            className="h-9 w-9 rounded-full bg-[#2A4736] flex items-center justify-center text-white shadow-md hover:scale-110 transition-transform"

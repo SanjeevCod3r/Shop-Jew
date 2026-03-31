@@ -1,22 +1,25 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, Clock, ArrowRight, ArrowLeft, Bookmark } from "lucide-react";
+import { Calendar, ArrowRight, Bookmark } from "lucide-react";
 
 export default function BlogPage() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  const categories = [
-    "All",
-    "News",
-    "Styling Tips",
-    "Jewelry Care",
-    "Brand Story",
-  ];
+  const categories = useMemo(() => {
+    const panelCategories = Array.from(
+      new Set(
+        blogs
+          .map((b) => (b.category || "").trim())
+          .filter(Boolean)
+      )
+    );
+    return ["All", ...panelCategories];
+  }, [blogs]);
 
   useEffect(() => {
     fetchBlogs();
@@ -38,11 +41,14 @@ export default function BlogPage() {
   const filteredBlogs =
     selectedCategory === "All"
       ? blogs
-      : blogs.filter((b) => b.category === selectedCategory);
+      : blogs.filter((b) => (b.category || "").trim() === selectedCategory);
 
   // Featured blog is the newest one
   const featuredBlog = blogs[0];
-  const otherBlogs = filteredBlogs.filter((b) => b._id !== featuredBlog?._id);
+  const otherBlogs =
+    selectedCategory === "All"
+      ? filteredBlogs.filter((b) => b._id !== featuredBlog?._id)
+      : filteredBlogs;
 
   if (loading) {
     return (
@@ -56,14 +62,14 @@ export default function BlogPage() {
     <div className="min-h-screen bg-[#fcfcfc] pb-24">
       {/* 1. Page Header */}
       <section className="bg-[#f9fafb] py-20 border-b border-gray-100 mb-16">
-        <div className="container mx-auto px-4 text-center">
-          <span className="text-gold uppercase tracking-[0.4em] text-xs font-black mb-6 block animate-in fade-in slide-in-from-bottom duration-700">
+        <div className="container mx-auto px-4 text-center stagger-children">
+          <span className="text-gold uppercase tracking-[0.4em] text-xs font-black mb-6 block">
             The Chronicles
           </span>
-          <h1 className="text-4xl md:text-6xl font-bold text-[#2A4537] leading-tight tracking-tighter animate-in fade-in slide-in-from-bottom duration-1000 delay-200">
-            Brand Narratives & <br /> Styling Guides
+          <h1 className="text-4xl md:text-6xl font-bold text-[#2A4537] leading-tight tracking-tighter">
+            Brand Narratives & Styling Guides
           </h1>
-          <div className="max-w-2xl mx-auto mt-8 flex flex-wrap justify-center gap-4 animate-in fade-in duration-1000 delay-400">
+          <div className="max-w-2xl mx-auto mt-8 flex flex-wrap justify-center gap-4">
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -80,12 +86,12 @@ export default function BlogPage() {
         </div>
       </section>
 
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 mt-2">
         {/* 2. Featured Post (Highlighted only if 'All' category is selected) */}
         {selectedCategory === "All" && featuredBlog && (
-          <section className="mb-24 animate-in fade-in duration-1000">
+          <section className="mb-24 anim-enter-up">
             <Link href={`/blog/${featuredBlog._id}`} className="group">
-              <div className="relative h-[400px] md:h-[600px] rounded-[40px] overflow-hidden shadow-2xl">
+              <div className="relative h-[400px] md:h-[600px] rounded-[40px] overflow-hidden shadow-2xl anim-hover-lift">
                 <Image
                   src={
                     featuredBlog.images?.[0] ||
@@ -130,8 +136,8 @@ export default function BlogPage() {
             ? otherBlogs.map((post, idx) => (
               <article
                 key={post._id}
-                className="group animate-in fade-in slide-in-from-bottom duration-700"
-                style={{ animationDelay: `${idx * 150}ms` }}
+                className="group anim-enter-up anim-hover-lift"
+                style={{ animationDelay: `${Math.min(idx * 90, 450)}ms` }}
               >
                 <Link href={`/blog/${post._id}`}>
                   <div className="aspect-[4/3] rounded-[32px] overflow-hidden relative mb-8 shadow-sm">

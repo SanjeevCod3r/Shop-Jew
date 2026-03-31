@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Mail, Phone, MapPin, Clock, Send, Sparkles, Gem, ShieldCheck, ArrowRight } from "lucide-react";
@@ -8,22 +8,64 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 export default function ContactPage() {
-  const handleSubmit = (e) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleChange = (field) => (e) => {
+    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Logic for form submission goes here
-    console.log("Contact form submitted");
+    if (!formData.name || !formData.email || !formData.message) {
+      toast.error("Please fill name, email and message");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const response = await fetch("/api/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.error || "Failed to submit inquiry");
+        return;
+      }
+
+      toast.success("Inquiry submitted successfully!");
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-white font-sans text-gray-800">
+    <div className="min-h-screen bg-white font-sans text-gray-800 overflow-x-hidden">
       {/* 1. Hero Section - Direct & Immersive */}
-      <section className="relative h-[60vh] flex items-center justify-center overflow-hidden mr-0 md:mr-4 ml-0 md:ml-4 rounded-0 md:rounded-[40px] mt-0 md:mt-4">
+      <section className="relative h-[58vh] md:h-[60vh] flex items-center justify-center overflow-hidden mr-0 md:mr-4 ml-0 md:ml-4 rounded-0 md:rounded-[40px] mt-0 md:mt-4">
         <div className="absolute inset-0 z-0">
           <Image
             src="/images/AestheticJew.jpeg"
-            alt="LuxeLoom Concierge Heritage"
+            alt="Cezore Concierge Heritage"
             fill
             className="object-cover scale-105 animate-in fade-in duration-1000 brightness-50"
             priority
@@ -32,24 +74,24 @@ export default function ContactPage() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10 text-center text-white">
-          <span className="text-[#C5A028] uppercase tracking-[0.6em] text-xs font-bold mb-6 block animate-in slide-in-from-bottom duration-700">
+          <span className="text-[#C5A028] uppercase tracking-[0.45em] md:tracking-[0.6em] text-[10px] md:text-xs font-bold mb-4 md:mb-6 block animate-in slide-in-from-bottom duration-700">
             PRIVATE CONCIERGE
           </span>
-          <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-[1.1] tracking-tighter animate-in slide-in-from-bottom duration-1000 delay-200">
+          <h1 className="text-3xl sm:text-4xl md:text-7xl font-bold mb-5 md:mb-8 leading-[1.1] tracking-tighter animate-in slide-in-from-bottom duration-1000 delay-200">
             Speak with a <br /> Jewelry Specialist
           </h1>
-          <p className="max-w-xl mx-auto text-lg md:text-xl text-gray-200 font-light leading-relaxed animate-in slide-in-from-bottom duration-1000 delay-300">
+          <p className="max-w-xl mx-auto text-base md:text-xl text-gray-200 font-light leading-relaxed animate-in slide-in-from-bottom duration-1000 delay-300">
             Our experts are dedicated to helping you find the perfect piece or curate your private collection.
           </p>
         </div>
       </section>
 
       {/* 2. Contact Info Grid - High-End Layout */}
-      <section className="py-24 bg-white relative">
+      <section className="py-16 md:py-24 bg-white relative">
         <div className="container mx-auto px-4 lg:px-20">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 -mt-32 relative z-20">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12 mt-0 md:-mt-32 relative z-20">
             {/* Location Card */}
-            <div className="bg-white p-12 rounded-[32px] border border-gray-100 shadow-2xl hover:shadow-gold/10 transition-all duration-500 group hover:-translate-y-2">
+            <div className="bg-white p-7 md:p-12 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-2xl hover:shadow-gold/10 transition-all duration-500 group hover:-translate-y-2">
               <div className="h-16 w-16 rounded-2xl bg-gray-50 flex items-center justify-center mb-8 group-hover:bg-[#2A4736] transition-colors">
                 <MapPin className="h-8 w-8 text-[#2A4736] group-hover:text-white transition-colors" />
               </div>
@@ -63,7 +105,7 @@ export default function ContactPage() {
             </div>
 
             {/* Direct Line Card */}
-            <div className="bg-white p-12 rounded-[32px] border border-gray-100 shadow-2xl hover:shadow-gold/10 transition-all duration-500 group hover:-translate-y-2">
+            <div className="bg-white p-7 md:p-12 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-2xl hover:shadow-gold/10 transition-all duration-500 group hover:-translate-y-2">
               <div className="h-16 w-16 rounded-2xl bg-gray-50 flex items-center justify-center mb-8 group-hover:bg-[#2A4736] transition-colors">
                 <Phone className="h-8 w-8 text-[#2A4736] group-hover:text-white transition-colors" />
               </div>
@@ -78,7 +120,7 @@ export default function ContactPage() {
             </div>
 
             {/* Digital Concierge Card */}
-            <div className="bg-white p-12 rounded-[32px] border border-gray-100 shadow-2xl hover:shadow-gold/10 transition-all duration-500 group hover:-translate-y-2">
+            <div className="bg-white p-7 md:p-12 rounded-[24px] md:rounded-[32px] border border-gray-100 shadow-2xl hover:shadow-gold/10 transition-all duration-500 group hover:-translate-y-2">
               <div className="h-16 w-16 rounded-2xl bg-gray-50 flex items-center justify-center mb-8 group-hover:bg-[#2A4736] transition-colors">
                 <Mail className="h-8 w-8 text-[#2A4736] group-hover:text-white transition-colors" />
               </div>
@@ -87,8 +129,8 @@ export default function ContactPage() {
                 Preferred communication for digital receipts, catalog requests, and maintenance schedules.
               </p>
               <div className="text-gray-900 font-bold text-sm">
-                concierge@luxeloom.com <br />
-                support@luxeloom.com
+                concierge@cezore.com <br />
+                support@cezore.com
               </div>
             </div>
           </div>
@@ -96,26 +138,26 @@ export default function ContactPage() {
       </section>
 
       {/* 3. The Consultation Suite - Form & Imagery */}
-      <section className="py-24 bg-[#fcfcfc]">
+      <section className="py-16 md:py-24 bg-[#fcfcfc]">
         <div className="container mx-auto px-4 lg:px-20">
-          <div className="flex flex-col lg:flex-row gap-20 items-stretch">
+          <div className="flex flex-col lg:flex-row gap-10 md:gap-20 items-stretch">
             {/* Imagery & Text Column */}
-            <div className="w-full lg:w-1/2 flex flex-col justify-center space-y-12 animate-in slide-in-from-left duration-1000">
+            <div className="w-full lg:w-1/2 flex flex-col justify-center space-y-8 md:space-y-12 animate-in slide-in-from-left duration-1000">
               <div className="space-y-4">
                 <div className="flex items-center gap-3 mb-2">
                   <Sparkles className="h-6 w-6 text-[#C5A028]" />
-                  <span className="text-[#C5A028] font-black uppercase tracking-[0.3em] text-xs">A Private Session</span>
+                  <span className="text-[#C5A028] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-[10px] md:text-xs">A Private Session</span>
                 </div>
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight tracking-tighter">
+                <h2 className="text-3xl md:text-5xl font-bold text-gray-900 leading-tight tracking-tighter">
                   Request a Private <br /> <span className="text-[#2A4736]">Expert Showcase</span>
                 </h2>
-                <p className="text-lg text-gray-500 font-light leading-relaxed max-w-md">
+                <p className="text-base md:text-lg text-gray-500 font-light leading-relaxed max-w-md">
                   Complete the inquiry Below, and our senior specialists will reach out to schedule an exclusive viewing or 
                   consultation within 24 hours.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-8">
                 <div className="flex items-center gap-4">
                   <div className="h-12 w-12 rounded-full bg-gray-50 flex items-center justify-center flex-shrink-0">
                     <ShieldCheck className="h-5 w-5 text-[#2A4736]" />
@@ -130,9 +172,9 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div className="relative aspect-[16/9] rounded-[32px] overflow-hidden group shadow-xl">
+              <div className="relative aspect-[16/10] md:aspect-[16/9] rounded-[24px] md:rounded-[32px] overflow-hidden group shadow-xl">
                  <Image
-                    src="/images/photo2.jpeg"
+                    src="/images/Dazzle.jpeg"
                     alt="Private Consultation"
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-1000"
@@ -143,18 +185,20 @@ export default function ContactPage() {
 
             {/* Form Column */}
             <div className="w-full lg:w-1/2">
-              <div className="bg-white p-12 lg:p-16 rounded-[40px] border border-gray-100 shadow-[0_32px_64px_-16px_rgba(42,71,54,0.1)] h-full overflow-hidden relative">
+              <div className="bg-white p-6 sm:p-8 md:p-12 lg:p-16 rounded-[24px] md:rounded-[40px] border border-gray-100 shadow-[0_32px_64px_-16px_rgba(42,71,54,0.1)] h-full overflow-hidden relative">
                 <div className="absolute top-0 right-0 p-8 opacity-5">
                    <Gem className="h-32 w-32 text-[#2A4736]" />
                 </div>
                 
-                <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8 relative z-10">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
                     <div className="space-y-3">
                        <Label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Full Name</Label>
                        <Input 
                          type="text" 
                          placeholder="E.g. Alexander Sterling"
+                         value={formData.name}
+                         onChange={handleChange("name")}
                          className="bg-gray-50/50 border-0 border-b-2 border-gray-100 rounded-none shadow-none focus-visible:ring-0 focus-visible:border-[#2A4736] py-6 px-1 text-sm transition-all"
                        />
                     </div>
@@ -163,6 +207,8 @@ export default function ContactPage() {
                        <Input 
                          type="email" 
                          placeholder="E.g. alex@estate.com"
+                         value={formData.email}
+                         onChange={handleChange("email")}
                          className="bg-gray-50/50 border-0 border-b-2 border-gray-100 rounded-none shadow-none focus-visible:ring-0 focus-visible:border-[#2A4736] py-6 px-1 text-sm transition-all"
                        />
                     </div>
@@ -172,7 +218,9 @@ export default function ContactPage() {
                      <Label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Inquiry Subject</Label>
                      <Input 
                          type="text" 
-                         placeholder=""
+                         placeholder="E.g. Custom Necklace Consultation"
+                         value={formData.subject}
+                         onChange={handleChange("subject")}
                          className="bg-gray-50/50 border-0 border-b-2 border-gray-100 rounded-none shadow-none focus-visible:ring-0 focus-visible:border-[#2A4736] py-6 px-1 text-sm transition-all"
                        />
                   </div>
@@ -182,15 +230,18 @@ export default function ContactPage() {
                      <Textarea 
                        placeholder="How may we assist in your search for brilliance?"
                        rows={4}
+                       value={formData.message}
+                       onChange={handleChange("message")}
                        className="bg-gray-50/50 border-0 border-b-2 border-gray-100 rounded-none shadow-none focus-visible:ring-0 focus-visible:border-[#2A4736] py-4 px-1 text-sm transition-all resize-none"
                      ></Textarea>
                   </div>
 
                   <Button 
                     type="submit"
-                    className="w-full bg-[#2A4736] hover:bg-[#1d3526] text-white py-8 rounded-2xl font-bold text-sm tracking-[0.2em] uppercase flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl group border-none"
+                    disabled={submitting}
+                    className="w-full bg-[#2A4736] hover:bg-[#1d3526] text-white py-6 md:py-8 rounded-2xl font-bold text-xs md:text-sm tracking-[0.12em] md:tracking-[0.2em] uppercase flex items-center justify-center gap-2 md:gap-3 transition-all active:scale-95 shadow-xl group border-none"
                   >
-                    SEND INQUIRY
+                    {submitting ? "SENDING..." : "SEND INQUIRY"}
                     <Send className="h-4 w-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                   </Button>
                   

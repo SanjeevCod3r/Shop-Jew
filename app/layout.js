@@ -5,7 +5,7 @@ import { Toaster } from "sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "LuxeLoom - Premium Jewelry",
+  title: "Cezore - Premium Jewelry",
   description: "Exquisite handcrafted jewelry for every occasion.",
 };
 

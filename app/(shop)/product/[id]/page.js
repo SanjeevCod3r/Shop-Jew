@@ -167,11 +167,19 @@ export default function ProductDetailPage() {
 
   // Build spec rows from product fields
   const specItems = [
-    { icon: Tag, label: "SKU", value: product.sku || product._id.slice(-8).toUpperCase() },
+    {
+      icon: Tag,
+      label: "SKU",
+      value: product.sku || product._id.slice(-8).toUpperCase(),
+    },
     { icon: Gem, label: "Stone / Gem", value: product.stone || "—" },
     { icon: Layers, label: "Primary Metal", value: product.material || "—" },
     { icon: Package, label: "Design", value: product.design || "—" },
-    { icon: ShoppingCart, label: "Set / Collection", value: product.set || "Individual Piece" },
+    {
+      icon: ShoppingCart,
+      label: "Set / Collection",
+      value: product.set || "Individual Piece",
+    },
     { icon: Ruler, label: "Category", value: product.category },
   ];
 
@@ -235,7 +243,9 @@ export default function ProductDetailPage() {
               >
                 <Heart
                   className={`h-6 w-6 transition-colors ${
-                    wishlisted ? "fill-red-500 text-red-500" : "text-gray-400 group-hover/heart:text-red-500"
+                    wishlisted
+                      ? "fill-red-500 text-red-500"
+                      : "text-gray-400 group-hover/heart:text-red-500"
                   }`}
                 />
               </button>
@@ -244,7 +254,9 @@ export default function ProductDetailPage() {
                   <div
                     key={idx}
                     className={`h-1.5 transition-all duration-500 rounded-full ${
-                      selectedImage === idx ? "w-8 bg-[#C5A028]" : "w-2 bg-gray-200"
+                      selectedImage === idx
+                        ? "w-8 bg-[#C5A028]"
+                        : "w-2 bg-gray-200"
                     }`}
                   />
                 ))}
@@ -257,10 +269,11 @@ export default function ProductDetailPage() {
             <div className="mb-8">
               {/* Category / Stone badge */}
               <span className="text-[#8e8e8e] text-sm font-medium mb-2 block">
-                {product.stone ? `${product.stone} · ` : ""}{product.category}
+                {product.stone ? `${product.stone} · ` : ""}
+                {product.category}
               </span>
 
-              <h1 className="text-[28px] lg:text-[34px] font-bold text-gray-900 leading-tight mb-3">
+              <h1 className="text-[30px] lg:text-[34px] font-bold text-gray-900 leading-tight mb-3">
                 {product.title}
               </h1>
 
@@ -268,7 +281,10 @@ export default function ProductDetailPage() {
               <div className="flex items-center gap-4 mb-6">
                 <div className="flex items-center gap-0.5">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-[#FFB800] text-[#FFB800]" />
+                    <Star
+                      key={i}
+                      className="h-5 w-5 fill-[#FFB800] text-[#FFB800]"
+                    />
                   ))}
                 </div>
                 <span className="text-gray-400 text-sm font-mono">
@@ -278,13 +294,15 @@ export default function ProductDetailPage() {
 
               {/* Price */}
               <div className="flex items-center gap-3 mb-8">
-                <span className="text-[32px] font-bold text-[#2A4736]">
+                <span className="text-[35px] font-bold text-[#2A4736]">
                   ₹{product.price.toLocaleString()}
                 </span>
                 <span className="text-gray-400 line-through text-lg">
                   ₹{(product.price * 1.5).toLocaleString()}
                 </span>
-                <span className="text-xs font-bold bg-green-100 text-green-700 px-3 py-1 rounded-full">33% OFF</span>
+                <span className="text-xs font-bold bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                  33% OFF
+                </span>
               </div>
 
               {/* Quick Spec Pills */}
@@ -354,9 +372,9 @@ export default function ProductDetailPage() {
               )}
 
               {/* Action Buttons */}
-              <div className="flex flex-col gap-4 mb-10">
+              <div className="flex gap-4 mb-10">
                 <button
-                  className={`h-20 bg-[#2A4537] hover:bg-[#C5A028] text-white hover:text-[#111] rounded-[20px] font-black text-[18px] uppercase tracking-[0.3em] flex items-center justify-center transition-all shadow-2xl active:scale-[0.98] ${
+                  className={`flex-1 h-14 bg-[#2A4537] hover:bg-[#C5A028] text-white hover:text-[#111] rounded-[16px] font-bold text-[14px] uppercase tracking-[0.2em] flex items-center justify-center transition-all shadow-xl active:scale-[0.98] ${
                     product.stock === 0 ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   onClick={buyNow}
@@ -364,12 +382,13 @@ export default function ProductDetailPage() {
                 >
                   Buy Now
                 </button>
+
                 <button
-                  className="w-full h-16 bg-transparent border-2 border-gray-100 hover:border-[#C5A028] text-[#111] rounded-[24px] font-black text-[13px] uppercase tracking-[0.3em] flex items-center justify-center gap-3 transition-all active:scale-[0.98]"
+                  className="flex-1 h-14 bg-transparent border-2 border-gray-200 hover:border-[#C5A028] text-[#111] rounded-[16px] font-bold text-[12px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
                   onClick={addToCart}
                   disabled={product.stock === 0}
                 >
-                  <ShoppingCart className="h-5 w-5" />
+                  <ShoppingCart className="h-4 w-4" />
                   {product.stock === 0 ? "Out of Stock" : "Add to Vault"}
                 </button>
               </div>
@@ -428,7 +447,15 @@ export default function ProductDetailPage() {
 
                 {/* Stock indicator */}
                 <div className="pt-2 border-t border-gray-100">
-                  <p className={`text-[11px] font-black uppercase tracking-widest ${product.stock > 5 ? "text-green-600" : product.stock > 0 ? "text-amber-600" : "text-red-500"}`}>
+                  <p
+                    className={`text-[11px] font-black uppercase tracking-widest ${
+                      product.stock > 5
+                        ? "text-green-600"
+                        : product.stock > 0
+                        ? "text-amber-600"
+                        : "text-red-500"
+                    }`}
+                  >
                     {product.stock > 5
                       ? `✓ In Stock (${product.stock} available)`
                       : product.stock > 0
@@ -444,7 +471,7 @@ export default function ProductDetailPage() {
         {/* Detailed Info Tabs */}
         <div className="mt-20 border-t border-gray-100 pt-16">
           <div className="flex gap-10 mb-10 overflow-x-auto pb-2">
-            {["description", "specifications", "reviews"].map((tab) => (
+            {["description"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -480,98 +507,14 @@ export default function ProductDetailPage() {
                       <span className="text-gray-400 font-medium text-sm flex items-center gap-1.5">
                         <Icon className="h-3.5 w-3.5" /> {label}:
                       </span>
-                      <span className="font-bold text-gray-800 text-sm">{value}</span>
+                      <span className="font-bold text-gray-800 text-sm">
+                        {value}
+                      </span>
                     </div>
                   ) : null
                 )}
               </div>
             </div>
-          )}
-
-          {activeTab === "specifications" && (
-            <div className="max-w-3xl">
-              <div className="rounded-[32px] border border-gray-100 overflow-hidden shadow-sm">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="bg-[#2A4736] text-white">
-                      <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest w-1/2">
-                        Attribute
-                      </th>
-                      <th className="px-8 py-5 text-[11px] font-black uppercase tracking-widest">
-                        Details
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
-                    <tr className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-8 py-5 text-sm font-semibold text-gray-500 flex items-center gap-2">
-                        <Tag className="h-3.5 w-3.5 text-[#C5A028]" /> SKU
-                      </td>
-                      <td className="px-8 py-5 text-sm font-bold text-gray-900 font-mono">
-                        {product.sku || product._id.slice(-8).toUpperCase()}
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-8 py-5 text-sm font-semibold text-gray-500">
-                        <span className="flex items-center gap-2"><Gem className="h-3.5 w-3.5 text-[#C5A028]" /> Stone / Gem</span>
-                      </td>
-                      <td className="px-8 py-5 text-sm font-bold text-gray-900">
-                        {product.stone || "—"}
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-8 py-5 text-sm font-semibold text-gray-500">
-                        <span className="flex items-center gap-2"><Layers className="h-3.5 w-3.5 text-[#C5A028]" /> Primary Metal</span>
-                      </td>
-                      <td className="px-8 py-5 text-sm font-bold text-gray-900">
-                        {product.material || "—"}
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-8 py-5 text-sm font-semibold text-gray-500">
-                        <span className="flex items-center gap-2"><Package className="h-3.5 w-3.5 text-[#C5A028]" /> Design Style</span>
-                      </td>
-                      <td className="px-8 py-5 text-sm font-bold text-gray-900">
-                        {product.design || "—"}
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-8 py-5 text-sm font-semibold text-gray-500">
-                        <span className="flex items-center gap-2"><Tag className="h-3.5 w-3.5 text-[#C5A028]" /> Set / Collection</span>
-                      </td>
-                      <td className="px-8 py-5 text-sm font-bold text-gray-900">
-                        {product.set || "Individual Piece"}
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-8 py-5 text-sm font-semibold text-gray-500">
-                        <span className="flex items-center gap-2"><Ruler className="h-3.5 w-3.5 text-[#C5A028]" /> Available Sizes</span>
-                      </td>
-                      <td className="px-8 py-5 text-sm font-bold text-gray-900">
-                        {product.ringSizes && product.ringSizes.length > 0
-                          ? product.ringSizes.join(", ")
-                          : "One Size"}
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-8 py-5 text-sm font-semibold text-gray-500">Category</td>
-                      <td className="px-8 py-5 text-sm font-bold text-gray-900">{product.category}</td>
-                    </tr>
-                    <tr className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-8 py-5 text-sm font-semibold text-gray-500">Stock</td>
-                      <td className="px-8 py-5 text-sm font-bold text-gray-900">{product.stock} units</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "reviews" && (
-            <p className="text-gray-500 text-sm italic">
-              No reviews yet for this product. Be the first to share your
-              thoughts!
-            </p>
           )}
         </div>
 
@@ -606,7 +549,9 @@ export default function ProductDetailPage() {
                       {p.title}
                     </h3>
                     {p.stone && (
-                      <p className="text-[11px] text-gray-400 mb-1">{p.stone}</p>
+                      <p className="text-[11px] text-gray-400 mb-1">
+                        {p.stone}
+                      </p>
                     )}
                     <span className="font-bold text-[16px] text-[#2c3e34]">
                       ₹{p.price.toLocaleString()}

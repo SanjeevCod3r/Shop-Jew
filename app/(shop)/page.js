@@ -27,17 +27,16 @@ const CATEGORIES_ICONS = {
   Necklace: Sparkles,
   Earing: Gem,
   Bracelet: CircleDot,
-  Piercing: Focus,
   Chain: CircleDot,
 };
 
 // Thumbnails at bottom based on mockup layout
 const BOTTOM_CATS = [
-  { name: "Earings", image: "/images/earing.png" },
   { name: "Rings", image: "/images/ring.png" },
-  { name: "Chain", image: "/images/chain.png" },
   { name: "Necklace", image: "/images/necklace.png" },
-  { name: "Bangles", image: "/images/bangles.png" },
+  { name: "Earings", image: "/images/earing.png" },
+  { name: "Bracelet", image: "/images/bangles.png" },
+  { name: "Chain", image: "/images/chain.png" },
 ];
 
 const GALLERY_IMAGES = [
@@ -48,6 +47,7 @@ const GALLERY_IMAGES = [
   "/images/jew8.jpeg",
   "/images/jew6.jpeg",
   "/images/jew7.jpeg",
+  "/images/jew10.jpeg",
 ];
 
 const WORKS_DATA = [
@@ -55,31 +55,31 @@ const WORKS_DATA = [
     id: 1,
     title: "THE ROSELINE RING",
     category: "Rings",
-    image: "/images/photo.jpeg",
+    image: "/images/roseRing.jpeg",
   },
   {
     id: 2,
     title: "THE ZOË EARRINGS",
-    category: "Earrings",
-    image: "/images/jew4.jpeg",
+    category: "Earings",
+    image: "/images/HoopEar.jpeg",
   },
   {
     id: 3,
     title: "THE Hibiscus Ring II",
     category: "Rings",
-    image: "/images/photo2.jpeg",
+    image: "/images/HisRing.jpeg",
   },
   {
     id: 4,
     title: "THE CHUBBY HOOPS",
     category: "Earrings",
-    image: "/images/AestheticJew.jpeg",
+    image: "/images/Hoop.jpeg",
   },
   {
     id: 5,
-    title: "THE CHUBBY HOOPS",
+    title: "THE HOOP RING",
     category: "Rings",
-    image: "/images/Asthetic3.jpeg",
+    image: "/images/Hoop2.jpeg",
   },
 ];
 
@@ -88,7 +88,6 @@ export default function App() {
   const [products, setProducts] = useState([]);
   const [newProducts, setNewProducts] = useState([]);
   const [blogs, setBlogs] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const { token } = useAuthStore();
   const { cartItems, setCart, addItem } = useCartStore();
@@ -113,21 +112,18 @@ export default function App() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [prodRes, newProdRes, blogRes, catRes] = await Promise.all([
+      const [prodRes, newProdRes, blogRes] = await Promise.all([
         fetch("/api/products?limit=8"),
         fetch("/api/products?limit=4&sort=createdAt&order=desc"),
         fetch("/api/blogs?limit=3"),
-        fetch("/api/categories"),
       ]);
       const prodData = await prodRes.json();
       const newProdData = await newProdRes.json();
       const blogData = await blogRes.json();
-      const catData = await catRes.json();
 
       setProducts(prodData.products || []);
       setNewProducts(newProdData.products || []);
       setBlogs(blogData.blogs || []);
-      setCategories(catData.categories || []);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -164,13 +160,13 @@ export default function App() {
     }
   };
 
-  // Use categories from DB or fallback to static list if DB is empty
-  const displayCategories =
-    categories.length > 0 ? categories : Object.keys(CATEGORIES_ICONS);
+  // Sidebar categories are fully controlled by static icon map.
+  // Adding a new key in CATEGORIES_ICONS will auto-create a linked item.
+  const displayCategories = Object.keys(CATEGORIES_ICONS);
 
   return (
-    <div className="min-h-screen bg-white font-sans text-gray-800">
-      <main className="container mx-auto px-0 md:px-4 mt-8 flex flex-col md:flex-row gap-6 lg:gap-8 mb-20 relative z-10">
+    <div className="min-h-screen bg-white font-sans text-gray-800 overflow-x-hidden">
+      <main className="container mx-auto px-0 md:px-4 mt-4 md:mt-8 flex flex-col md:flex-row gap-4 md:gap-6 lg:gap-8 mb-16 md:mb-20 relative z-10">
         {/* Sidebar */}
         <div className="hidden md:block w-[280px] flex-shrink-0 bg-white border border-gray-200 rounded-sm shadow-sm self-start">
           <ul className="flex flex-col py-3">
@@ -205,8 +201,8 @@ export default function App() {
         </div>
 
         {/* Banners */}
-        <div className="flex-1 flex flex-col lg:flex-row gap-6 px-4 md:px-0">
-          <div className="flex-1 bg-[#2A4736] rounded-[24px] overflow-hidden relative min-h-[420px] shadow-sm">
+        <div className="flex-1 flex flex-col lg:flex-row gap-4 md:gap-6 px-4 md:px-0">
+          <div className="flex-1 bg-[#2A4736] rounded-[20px] md:rounded-[24px] overflow-hidden relative min-h-[360px] md:min-h-[420px] shadow-sm">
             <div className="absolute inset-0 z-0">
               <Image
                 src="/images/luxeloom_main_banner.png"
@@ -217,14 +213,14 @@ export default function App() {
               />
               <div className="absolute inset-0 bg-gradient-to-r from-[#2B4E38]/95 via-[#2B4E38]/70 to-transparent w-full md:w-[85%]"></div>
             </div>
-            <div className="relative z-10 w-full md:w-[70%] h-full p-10 md:p-14 flex flex-col justify-center">
-              <h2 className="text-[#C5A028] text-[28px] font-normal mb-1 tracking-wide">
+            <div className="relative z-10 w-full md:w-[70%] h-full p-6 sm:p-8 md:p-14 flex flex-col justify-center">
+              <h2 className="text-[#C5A028] text-[22px] sm:text-[26px] md:text-[28px] font-normal mb-1 tracking-wide">
                 Where Luxury
               </h2> 
-              <h1 className="text-white text-[42px] sm:text-[48px] lg:text-[52px] font-semibold leading-[1.1] mb-5 tracking-tight">
+              <h1 className="text-white text-[30px] sm:text-[40px] md:text-[48px] lg:text-[52px] font-semibold leading-[1.1] mb-4 md:mb-5 tracking-tight">
                 Meets Affordability
               </h1>
-              <p className="text-[#b1c5b4] text-[15px] mb-10 max-w-[340px] leading-relaxed font-light">
+              <p className="text-[#b1c5b4] text-[14px] md:text-[15px] mb-7 md:mb-10 max-w-[340px] leading-relaxed font-light">
                 Exquisite, handcrafted jewelry that celebrates elegance and
                 individuality.
               </p>
@@ -238,7 +234,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className="w-full lg:w-[300px] xl:w-[320px] rounded-[24px] overflow-hidden relative min-h-[420px] shadow-sm flex-shrink-0 group cursor-pointer">
+          <div className="w-full lg:w-[300px] xl:w-[320px] rounded-[20px] md:rounded-[24px] overflow-hidden relative min-h-[300px] md:min-h-[420px] shadow-sm flex-shrink-0 group cursor-pointer">
             <Image
               src="/images/luxeloom_side_banner.png"
               alt="Sale Rings"
@@ -246,7 +242,7 @@ export default function App() {
               className="object-cover group-hover:scale-105 transition-transform duration-700"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-            <div className="absolute bottom-0 left-0 right-0 p-10 flex flex-col items-center text-center">
+            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 flex flex-col items-center text-center">
               <span className="text-gray-300 text-xs tracking-[0.2em] font-medium uppercase mb-3">
                 Gold Pricing
               </span>
@@ -265,15 +261,15 @@ export default function App() {
       </main>
 
       {/* Category Thumbnails */}
-      <section className="container mx-auto py-1 -mt-8">
-        <div className="flex items-center gap-6 overflow-x-auto no-scrollbar pb-4 snap-x -mx-4 px-4 md:mx-0 md:px-0 md:justify-between w-full">
+      <section className="container mx-auto py-1 -mt-2 md:-mt-8">
+        <div className="flex items-center gap-4 md:gap-6 overflow-x-auto no-scrollbar pb-4 snap-x -mx-4 px-4 md:mx-0 md:px-0 md:justify-between w-full">
           {BOTTOM_CATS.map((cat, idx) => (
             <Link
               key={idx}
               href={`/category/${cat.name.toLowerCase().replace(" ", "-")}`}
               className="group flex flex-col items-center gap-5 flex-shrink-0 snap-center outline-none"
             >
-              <div className="w-[120px] h-[75px] sm:w-[150px] sm:h-[95px] xl:w-[170px] xl:h-[105px] rounded-[30px] sm:rounded-[50px] overflow-hidden  shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] group-hover:shadow-[0_8px_25px_-5px_rgba(42,71,54,0.15)] group-hover:border-[#2A4736]/30 transition-all duration-300 relative">
+              <div className="w-[120px] h-[75px] sm:w-[150px] sm:h-[95px] xl:w-[170px] xl:h-[105px] rounded-[30px] sm:rounded-[50px] overflow-hidden shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] group-hover:shadow-[0_8px_25px_-5px_rgba(42,71,54,0.15)] group-hover:border-[#2A4736]/30 transition-all duration-300 relative">
                 <Image
                   src={cat.image}
                   alt={cat.name}
@@ -281,7 +277,7 @@ export default function App() {
                   className="object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
                 />
               </div>
-              <span className="text-black-200 font-medium text-[15px] group-hover:text-[#2A4736] transition-colors uppercase tracking-widest text-[11px]">
+              <span className="text-black-200 font-medium text-[11px] group-hover:text-[#2A4736] transition-colors uppercase tracking-widest">
                 {cat.name}
               </span>
             </Link>
@@ -290,9 +286,9 @@ export default function App() {
       </section>
 
       {/* New Product Section */}
-      <section className="container mx-auto px-4 mb-20 animate-in fade-in duration-1000 mt-20">
-        <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-10">
-          <h2 className="text-[40px] font-semibold text-[#2A4537]">
+      <section className="container mx-auto px-4 mb-16 md:mb-20 animate-in fade-in duration-1000 mt-14 md:mt-20">
+          <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-6 md:mb-10">
+          <h2 className="text-[28px] md:text-[40px] font-semibold text-[#2A4537]">
             New Product
           </h2>
           <Link
@@ -318,28 +314,28 @@ export default function App() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
             {newProducts.map((item) => (
               <Link
                 href={`/product/${item._id}`}
                 key={item._id}
-                className="bg-white rounded-[20px] border border-gray-100 p-6 flex flex-col group transition-all hover:shadow-xl relative overflow-hidden"
+                className="bg-white rounded-[20px] border border-gray-100 p-3 sm:p-6 flex flex-col group transition-all hover:shadow-xl relative overflow-hidden"
               >
-                <div className="relative aspect-square mb-6 overflow-hidden flex items-center justify-center">
+                <div className="relative aspect-square mb-3 md:mb-6 overflow-hidden flex items-center justify-center">
                   <img
                     src={item.images[0] || "https://via.placeholder.com/400"}
                     alt={item.title}
                     className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
-                <span className="text-[14px] text-[#C5A028] font-medium mb-1 truncate">
+                <span className="text-[12px] md:text-[14px] text-[#C5A028] font-medium mb-1 truncate">
                   {item.category}
                 </span>
-                <h3 className="font-bold text-[15px] text-[#2A4537] mb-2 truncate group-hover:text-[#2A4736] transition-colors">
+                <h3 className="font-bold text-[13px] md:text-[15px] text-[#2A4537] mb-2 truncate group-hover:text-[#2A4736] transition-colors">
                   {item.title}
                 </h3>
                 <div className="flex items-center justify-between mt-auto">
-                  <span className="font-bold text-[#2A4537] text-[15px]">
+                  <span className="font-bold text-[#2A4537] text-[13px] md:text-[15px]">
                     ₹{item.price.toLocaleString()}
                   </span>
                   <button
@@ -356,19 +352,19 @@ export default function App() {
       </section>
 
       {/* OUR WORKS Slider Section */}
-      <section className="bg-[#2A4537] py-24 mb-20 overflow-hidden">
-        <div className="container mx-auto px-4 lg:px-20">
+      <section className="bg-[#2A4537] py-12 md:py-24 mb-16 md:mb-20 overflow-hidden">
+        <div className="container mx-auto px-4 md:px-6 lg:px-20">
           {/* Header Area */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
-            <div className="max-w-[300px]">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-5 md:gap-8 mb-10 md:mb-16">
+            <div className="max-w-full md:max-w-[300px]">
               <p className="text-gray-400 text-[15px] leading-relaxed font-light">
                 Cezore combination of statement and simplistic style helps
                 create a look that's as unique as you are
               </p>
             </div>
             <div className="flex-1 text-center md:text-right">
-              <h2 className="text-[#C5A028] text-[60px] md:text-[80px] lg:text-[100px] font-black tracking-tighter leading-none m-0 uppercase">
-                OUR WORKS
+              <h2 className="text-[#C5A028] text-[34px] sm:text-[44px] md:text-[80px] lg:text-[100px] font-black tracking-tighter leading-none m-0 uppercase">
+                OUR PRODUCTS
               </h2>
             </div>
           </div>
@@ -380,10 +376,10 @@ export default function App() {
                 {WORKS_DATA.map((work, idx) => (
                   <div
                     key={work.id}
-                    className="embla__slide flex-[0_0_85%] sm:flex-[0_0_45%] lg:flex-[0_0_28%] xl:flex-[0_0_25%] min-w-0 pl-6"
+                    className="embla__slide flex-[0_0_90%] sm:flex-[0_0_45%] lg:flex-[0_0_28%] xl:flex-[0_0_25%] min-w-0 pl-4 md:pl-6"
                   >
                     <div
-                      className={`relative h-[480px] md:h-[550px] lg:h-[600px] rounded-[40px] overflow-hidden group/card shadow-2xl transition-transform duration-500 hover:scale-[1.02] ${idx % 2 === 0 ? "mt-0" : "mt-12"
+                      className={`relative h-[320px] sm:h-[400px] md:h-[550px] lg:h-[600px] rounded-[24px] md:rounded-[40px] overflow-hidden group/card shadow-2xl transition-transform duration-500 hover:scale-[1.02] ${idx % 2 === 0 ? "mt-0" : "mt-6 md:mt-12"
                         }`}
                     >
                       <Image
@@ -416,7 +412,7 @@ export default function App() {
           </div>
 
           {/* Navigation Area */}
-          <div className="flex items-center justify-center gap-4 mt-16">
+          <div className="flex items-center justify-center gap-3 md:gap-4 mt-10 md:mt-16">
             <button
               onClick={scrollPrev}
               className="h-14 w-14 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white/10 transition-all active:scale-95"
@@ -434,9 +430,9 @@ export default function App() {
       </section>
 
       {/* Trending Products Section */}
-      <section className="container mx-auto px-4 mb-20">
+      <section className="container mx-auto px-4 mb-16 md:mb-20">
         <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-10">
-          <h2 className="text-[40px] font-semibold text-[#2A4537]">
+          <h2 className="text-[28px] md:text-[40px] font-semibold text-[#2A4537]">
             Trending Products
           </h2>
           <Link
@@ -510,9 +506,9 @@ export default function App() {
       </section>
 
       {/* Dazzle In Every Moment Section */}
-      <section className="container mx-auto px-4 mb-20">
+      <section className="container mx-auto px-4 mb-16 md:mb-20">
         <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-10">
-          <h2 className="text-[40px] font-bold text-[#2A4537] tracking-tight">
+          <h2 className="text-[28px] md:text-[40px] font-bold text-[#2A4537] tracking-tight">
             Dazzle In Every Moment
           </h2>
           <Link
@@ -526,8 +522,8 @@ export default function App() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
           {/* Card 1: Horizontal with internal image */}
-          <div className="bg-[#f3f4f6]/80 rounded-[40px] p-8 md:p-10 flex flex-col md:flex-row items-center gap-10 group min-h-[450px]">
-            <div className="w-full md:w-[60%] relative h-[550px] rounded-[32px] overflow-hidden flex-shrink-0 shadow-sm border-4 border-white/20">
+          <div className="bg-[#f3f4f6]/80 rounded-[28px] md:rounded-[40px] p-6 md:p-10 flex flex-col md:flex-row items-center gap-6 md:gap-10 group min-h-[450px]">
+            <div className="w-full md:w-[60%] relative h-[340px] sm:h-[440px] md:h-[550px] rounded-[24px] md:rounded-[32px] overflow-hidden flex-shrink-0 shadow-sm border-4 border-white/20">
               <Image
                 src="/images/AestheticJew.jpeg"
                 alt="Ancient jewelry collection 1"
@@ -536,10 +532,10 @@ export default function App() {
               />
             </div>
             <div className="flex flex-col justify-center max-w-[340px]">
-              <h3 className="text-[36px] lg:text-[42px] font-bold text-[#2A4537] leading-[1.1] mb-6">
+              <h3 className="text-[28px] md:text-[36px] lg:text-[42px] font-bold text-[#2A4537] leading-[1.1] mb-4 md:mb-6">
                 Ancient Jewellery Collection
               </h3>
-              <p className="text-gray-500 text-[16px] mb-10 leading-relaxed font-light">
+              <p className="text-gray-500 text-[15px] md:text-[16px] mb-7 md:mb-10 leading-relaxed font-light">
                 beautiful long earrings with opal and carnelian earrings are
                 light in weight.
               </p>
@@ -553,14 +549,13 @@ export default function App() {
           </div>
 
           {/* Card 2: Vertical with content on top */}
-          <div className="bg-[#f3f4f6]/80 rounded-[40px] p-8 md:p-10 flex flex-col justify-between group min-h-[450px]">
-            <div className="flex flex-col mb-10">
-              <h3 className="text-[36px] lg:text-[42px] font-bold text-[#2A4537] leading-[1.1] mb-6 max-w-[400px]">
+          <div className="bg-[#f3f4f6]/80 rounded-[28px] md:rounded-[40px] p-6 md:p-10 flex flex-col justify-between group min-h-[450px]">
+            <div className="flex flex-col mb-7 md:mb-10">
+              <h3 className="text-[28px] md:text-[36px] lg:text-[42px] font-bold text-[#2A4537] leading-[1.1] mb-4 md:mb-6 max-w-[400px]">
               Ancient Jewellery Collection
               </h3>
-              <p className="text-gray-500 text-[16px] mb-10 leading-relaxed font-light max-w-[400px]">
-                beautiful long earrings with opal and carnelian earrings are
-                light in weight.
+              <p className="text-gray-500 text-[15px] md:text-[16px] mb-7 md:mb-10 leading-relaxed font-light max-w-[400px]">
+              delicate rings with opal and carnelian, beautifully crafted and light as a whisper.
               </p>
               <Link
                 href="/shop"
@@ -569,9 +564,9 @@ export default function App() {
                 Shop Now <ChevronRight className="h-4 w-4" />
               </Link>
             </div>
-            <div className="relative w-full h-[280px] rounded-[32px] overflow-hidden shadow-sm border-4 border-white/20">
+            <div className="relative w-full h-[240px] md:h-[280px] rounded-[24px] md:rounded-[32px] overflow-hidden shadow-sm border-4 border-white/20">
               <Image
-                src="/images/Asthetic3.jpeg"
+                src="/images/Dazzle.jpeg"
                 alt="Ancient jewelry collection 2"
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-700"
@@ -582,7 +577,7 @@ export default function App() {
       </section>
 
       {/* Our News & Updates Section */}
-      <section className="container mx-auto px-4 mb-24">
+      <section className="container mx-auto px-4 mb-16 md:mb-24">
         <div className="flex items-center justify-between mb-12">
           <h2 className="text-[32px] md:text-[42px] font-bold text-gray-900 tracking-tight">
             Our News & Updates
@@ -630,6 +625,12 @@ export default function App() {
                   <p className="text-gray-500 text-[14px] leading-relaxed line-clamp-2 font-medium">
                     {post.excerpt || (post.description ? post.description.replace(/<[^>]*>?/gm, "").substring(0, 120) + "..." : "No description available.")}
                   </p>
+                  <Link
+                    href={`/blog/${post._id}`}
+                    className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#2A4736] hover:underline underline-offset-4"
+                  >
+                    Read more <ChevronRight className="h-4 w-4" />
+                  </Link>
                 </div>
               </div>
             ))
@@ -644,11 +645,11 @@ export default function App() {
       </section>
 
       {/* Gallery Section */}
-      <section className="container mx-auto px-4 mb-20">
+      <section className="container mx-auto px-4 mb-16 md:mb-20">
         <div className="flex flex-col items-center mb-12">
-          <h2 className="text-[40px] font-bold text-[#2A4537]">Gallery</h2>
+          <h2 className="text-[28px] md:text-[40px] font-bold text-[#2A4537]">Gallery</h2>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[250px]">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 auto-rows-[150px] sm:auto-rows-[200px] md:auto-rows-[250px]">
           {/* Tall Item */}
           <div className="row-span-2 relative rounded-[24px] overflow-hidden group">
             <Image
@@ -711,7 +712,7 @@ export default function App() {
           </div>
           <div className="col-span-2 relative rounded-[24px] overflow-hidden group">
             <Image
-              src={GALLERY_IMAGES[4]}
+              src={GALLERY_IMAGES[7]}
               alt="Gallery 5"
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-700"
