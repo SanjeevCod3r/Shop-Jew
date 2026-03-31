@@ -209,7 +209,7 @@ export default function App() {
           <div className="flex-1 bg-[#2A4736] rounded-[24px] overflow-hidden relative min-h-[420px] shadow-sm">
             <div className="absolute inset-0 z-0">
               <Image
-                src="/images/LuxeLoom_main_banner.png"
+                src="/images/luxeloom_main_banner.png"
                 alt="Luxury Jewelry Model"
                 fill
                 className="object-cover object-right-top md:object-[80%_30%]"
@@ -240,7 +240,7 @@ export default function App() {
 
           <div className="w-full lg:w-[300px] xl:w-[320px] rounded-[24px] overflow-hidden relative min-h-[420px] shadow-sm flex-shrink-0 group cursor-pointer">
             <Image
-              src="/images/LuxeLoom_side_banner.png"
+              src="/images/luxeloom_side_banner.png"
               alt="Sale Rings"
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-700"
@@ -326,11 +326,9 @@ export default function App() {
                 className="bg-white rounded-[20px] border border-gray-100 p-6 flex flex-col group transition-all hover:shadow-xl relative overflow-hidden"
               >
                 <div className="relative aspect-square mb-6 overflow-hidden flex items-center justify-center">
-                  <Image
+                  <img
                     src={item.images[0] || "https://via.placeholder.com/400"}
                     alt={item.title}
-                    width={200}
-                    height={200}
                     className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
@@ -472,11 +470,9 @@ export default function App() {
                 className="bg-white rounded-[20px] border border-gray-100 p-6 flex flex-col group transition-all hover:shadow-xl relative overflow-hidden"
               >
                 <div className="relative aspect-square mb-6 overflow-hidden flex items-center justify-center">
-                  <Image
+                  <img
                     src={item.images[0] || "https://via.placeholder.com/400"}
                     alt={item.title}
-                    width={200}
-                    height={200}
                     className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>

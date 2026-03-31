@@ -162,11 +162,9 @@ export default function ProductDetailPage() {
                     : "border-gray-100 hover:border-gray-300"
                     }`}
                 >
-                  <Image
+                  <img
                     src={img}
                     alt={`${product.title} view ${idx + 1}`}
-                    width={80}
-                    height={80}
                     className="w-full h-full object-cover"
                   />
                 </button>
@@ -174,11 +172,9 @@ export default function ProductDetailPage() {
             </div>
             {/* Main Image */}
             <div className="flex-1 relative aspect-square rounded-[24px] overflow-hidden bg-gray-50 border border-gray-100 group">
-              <Image
+              <img
                 src={displayImages[selectedImage]}
                 alt={product.title}
-                width={600}
-                height={600}
                 className="w-full h-full object-contain p-8"
               />
               <button className="absolute top-6 right-6 h-12 w-12 rounded-full bg-white/80 backdrop-blur-sm border border-gray-100 flex items-center justify-center text-gray-500 hover:text-red-500 hover:bg-white transition-all shadow-sm">
@@ -395,11 +391,9 @@ export default function ProductDetailPage() {
                 <Link key={p._id} href={`/product/${p._id}`} className="group">
                   <div className="bg-white rounded-[20px] p-4 border border-gray-100 transition-all hover:shadow-xl hover:-translate-y-1">
                     <div className="relative aspect-square mb-4 rounded-[12px] overflow-hidden bg-gray-50 p-4">
-                      <Image
+                      <img
                         src={p.images[0]}
                         alt={p.title}
-                        width={200}
-                        height={200}
                         className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
                       />
                       <div className="absolute top-2 left-2 bg-white/90 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
