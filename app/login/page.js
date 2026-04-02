@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label'
 import { useAuthStore } from '@/lib/store'
 import { toast } from 'sonner'
-import { Store, Mail, Lock } from 'lucide-react'
+import { Store, Mail, Lock, ArrowLeft } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -58,6 +58,17 @@ export default function LoginPage() {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#2A4736]/30 rounded-full blur-[120px] animate-pulse"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#C5A028]/10 rounded-full blur-[120px] animate-pulse delay-700"></div>
       
+      {/* Back to Home */}
+      <Link 
+        href="/" 
+        className="absolute top-8 left-8 flex items-center gap-2 text-white/60 hover:text-[#C5A028] transition-all group z-20"
+      >
+        <div className="h-10 w-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 group-hover:border-[#C5A028]/50 group-hover:bg-[#C5A028]/10 transition-all">
+          <ArrowLeft className="h-5 w-5" />
+        </div>
+        <span className="text-xs uppercase tracking-[0.2em] font-bold">Back to Home</span>
+      </Link>
+
       <Card className="w-full max-w-md relative z-10 border-white/10 bg-white/5 backdrop-blur-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.8)] overflow-hidden bg-white">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#C5A028] to-transparent opacity-50"></div>
         

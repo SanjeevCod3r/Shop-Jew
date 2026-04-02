@@ -25,7 +25,7 @@ import { toast } from "sonner";
 const CATEGORIES_ICONS = {
   Rings: CircleDot,
   Necklace: Sparkles,
-  Earing: Gem,
+  Earings: Gem,
   Bracelet: CircleDot,
   Chain: CircleDot,
 };

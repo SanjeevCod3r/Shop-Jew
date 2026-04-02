@@ -6,12 +6,14 @@ import { ChevronRight, Star, ShoppingBag, ArrowLeft, Filter, Grid, List } from '
 import { useAuthStore, useCartStore } from '@/lib/store'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function ShopPage() {
   const { token } = useAuthStore()
   const { setCart } = useCartStore()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const searchQueryFromUrl = searchParams.get('search') || ''
 
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
@@ -23,14 +25,19 @@ export default function ShopPage() {
 
   useEffect(() => {
     fetchData()
-  }, [selectedCategory])
+  }, [selectedCategory, searchQueryFromUrl])
 
   const fetchData = async () => {
     try {
       setLoading(true)
-      const url = selectedCategory === 'All'
+      let url = selectedCategory === 'All'
         ? '/api/products?limit=80'
         : `/api/products?category=${encodeURIComponent(selectedCategory)}&limit=80`
+      
+      if (searchQueryFromUrl) {
+        url += `&search=${encodeURIComponent(searchQueryFromUrl)}`
+      }
+
       const [prodRes, catRes] = await Promise.all([
         fetch(url),
         fetch('/api/categories')
@@ -168,7 +175,13 @@ export default function ShopPage() {
             {/* Toolbar */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 md:gap-4 mb-6 md:mb-10 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
               <div className="text-xs sm:text-sm font-medium text-gray-500">
-                Showing <span className="text-black font-bold">{filteredProducts.length}</span> results for <span className="text-[#2A4736] font-bold">"{selectedCategory}"</span>
+                Showing <span className="text-black font-bold">{filteredProducts.length}</span> results 
+                {searchQueryFromUrl && (
+                  <> for <span className="text-[#2A4736] font-bold">"{searchQueryFromUrl}"</span></>
+                )}
+                {selectedCategory !== 'All' && (
+                  <> in <span className="text-[#2A4736] font-bold">"{selectedCategory}"</span></>
+                )}
               </div>
               <div className="flex items-center gap-2 md:gap-3 w-full sm:w-auto overflow-x-auto">
                 <button className="p-2 rounded-lg bg-gray-100 text-[#2A4736]"><Grid className="h-5 w-5" /></button>
