@@ -41,7 +41,7 @@ export default function Header() {
       <header className="container mx-auto px-4 py-4 md:py-6">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4 md:gap-6 lg:gap-8">
           {/* Mobile Menu & Logo */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between lg:justify-start gap-4 w-full lg:w-auto">
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
                 <button className="lg:hidden p-1 text-[#2A4736] hover:bg-[#2A4736]/5 rounded-xl transition-all active:scale-95">
@@ -120,11 +120,14 @@ export default function Header() {
 
             <Link
               href="/"
-              className="flex items-center text-[22px] md:text-[26px] font-bold text-black"
+              className="flex items-center text-[22px] md:text-[26px] font-bold text-black lg:mx-0 mx-auto"
             >
                <img src="/images/Logo2.png" alt="Cezore" className="h-7 md:h-8 w-auto" />
              Cezore
             </Link>
+
+            {/* Mobile Spacer to keep logo centered */}
+            <div className="w-10 lg:hidden"></div>
           </div>
 
           {/* Search Bar */}
