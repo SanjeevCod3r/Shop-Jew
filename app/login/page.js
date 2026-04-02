@@ -53,7 +53,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden bg-[#2A4537]">
+    <div className="min-h-screen relative flex items-center justify-center p-4 pt-24 md:pt-4 overflow-hidden bg-[#2A4537]">
       {/* Background Decorative Elements */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#2A4736]/30 rounded-full blur-[120px] animate-pulse"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#C5A028]/10 rounded-full blur-[120px] animate-pulse delay-700"></div>
@@ -61,7 +61,7 @@ export default function LoginPage() {
       {/* Back to Home */}
       <Link 
         href="/" 
-        className="absolute top-8 left-8 flex items-center gap-2 text-white/60 hover:text-[#C5A028] transition-all group z-20"
+        className="absolute top-4 left-4 md:top-8 md:left-8 flex items-center gap-2 text-white/60 hover:text-[#C5A028] transition-all group z-30"
       >
         <div className="h-10 w-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 group-hover:border-[#C5A028]/50 group-hover:bg-[#C5A028]/10 transition-all">
           <ArrowLeft className="h-5 w-5" />
