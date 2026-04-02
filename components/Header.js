@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [open, setOpen] = useState(false);
   const { token } = useAuthStore();
   const { cartItems } = useCartStore();
   const router = useRouter();
@@ -41,7 +42,7 @@ export default function Header() {
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4 md:gap-6 lg:gap-8">
           {/* Mobile Menu & Logo */}
           <div className="flex items-center gap-4">
-            <Sheet>
+            <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
                 <button className="lg:hidden p-1 text-[#2A4736] hover:bg-[#2A4736]/5 rounded-xl transition-all active:scale-95">
                   <Menu className="h-8 w-8" strokeWidth={3} title="Menu" />
@@ -50,28 +51,30 @@ export default function Header() {
               <SheetContent side="left" className="w-[300px] sm:w-[350px] bg-[#2A4736] border-[#1f3628] p-0">
                 <SheetHeader className="p-6 border-b border-[#3A504B]">
                   <SheetTitle className="text-black text-[30px] flex items-center">
-                    <img src="/images/logp5.png" alt="Cezore" className="h-9 w-auto" />
-                    Cezore
+                    <Link onClick={() => setOpen(false)} href="/" className="flex items-center gap-2">
+                      <img src="/images/logp5.png" alt="Cezore" className="h-9 w-auto" />
+                      Cezore
+                    </Link>
                   </SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col py-6">
-                  <Link href="/" className="px-8 py-4 text-gray-100 hover:bg-[#1f3628] hover:text-white transition-all font-medium border-l-4 border-transparent hover:border-[#C5A028] flex items-center gap-3">
+                  <Link onClick={() => setOpen(false)} href="/" className="px-8 py-4 text-gray-100 hover:bg-[#1f3628] hover:text-white transition-all font-medium border-l-4 border-transparent hover:border-[#C5A028] flex items-center gap-3">
                     <Home className="h-5 w-5 text-[#C5A028]" />
                     Home
                   </Link>
-                  <Link href="/shop" className="px-8 py-4 text-gray-100 hover:bg-[#1f3628] hover:text-white transition-all font-medium border-l-4 border-transparent hover:border-[#C5A028] flex items-center gap-3">
+                  <Link onClick={() => setOpen(false)} href="/shop" className="px-8 py-4 text-gray-100 hover:bg-[#1f3628] hover:text-white transition-all font-medium border-l-4 border-transparent hover:border-[#C5A028] flex items-center gap-3">
                     <ShoppingBag className="h-5 w-5 text-[#C5A028]" />
                     Shop
                   </Link>
-                  <Link href="/about" className="px-8 py-4 text-gray-100 hover:bg-[#1f3628] hover:text-white transition-all font-medium border-l-4 border-transparent hover:border-[#C5A028] flex items-center gap-3">
+                  <Link onClick={() => setOpen(false)} href="/about" className="px-8 py-4 text-gray-100 hover:bg-[#1f3628] hover:text-white transition-all font-medium border-l-4 border-transparent hover:border-[#C5A028] flex items-center gap-3">
                     <Info className="h-5 w-5 text-[#C5A028]" />
                     About Us
                   </Link>
-                  <Link href="/blog" className="px-8 py-4 text-gray-100 hover:bg-[#1f3628] hover:text-white transition-all font-medium border-l-4 border-transparent hover:border-[#C5A028] flex items-center gap-3">
+                  <Link onClick={() => setOpen(false)} href="/blog" className="px-8 py-4 text-gray-100 hover:bg-[#1f3628] hover:text-white transition-all font-medium border-l-4 border-transparent hover:border-[#C5A028] flex items-center gap-3">
                     <BookOpen className="h-5 w-5 text-[#C5A028]" />
                     Blog
                   </Link>
-                  <Link href="/contact" className="px-8 py-4 text-gray-100 hover:bg-[#1f3628] hover:text-white transition-all font-medium border-l-4 border-transparent hover:border-[#C5A028] flex items-center gap-3">
+                  <Link onClick={() => setOpen(false)} href="/contact" className="px-8 py-4 text-gray-100 hover:bg-[#1f3628] hover:text-white transition-all font-medium border-l-4 border-transparent hover:border-[#C5A028] flex items-center gap-3">
                     <PhoneCall className="h-5 w-5 text-[#C5A028]" />
                     Contact Us
                   </Link>
@@ -83,6 +86,7 @@ export default function Header() {
                       onClick={() => {
                         const { logout } = useAuthStore.getState();
                         logout();
+                        setOpen(false);
                         window.location.href = "/";
                       }}
                       className="w-full flex items-center gap-3 px-6 py-4 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all font-bold uppercase text-xs tracking-widest"
@@ -93,6 +97,7 @@ export default function Header() {
                   ) : (
                     <div className="flex flex-col gap-3">
                       <Link
+                        onClick={() => setOpen(false)}
                         href="/login"
                         className="w-full flex items-center gap-3 px-6 py-4 rounded-xl bg-[#1f3628] text-white hover:bg-[#C5A028]/20 transition-all font-bold uppercase text-xs tracking-widest"
                       >
@@ -100,6 +105,7 @@ export default function Header() {
                         Login
                       </Link>
                       <Link
+                        onClick={() => setOpen(false)}
                         href="/signup"
                         className="w-full flex items-center gap-3 px-6 py-4 rounded-xl bg-[#C5A028] text-black hover:bg-[#b08d20] transition-all font-bold uppercase text-xs tracking-widest"
                       >
