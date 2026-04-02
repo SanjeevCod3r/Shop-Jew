@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, Suspense } from 'react'
 import Link from 'next/link'
 import { ChevronRight, Star, ShoppingBag, ArrowLeft, Filter, Grid, List } from 'lucide-react'
 import { useAuthStore, useCartStore } from '@/lib/store'
@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function ShopPage() {
+function ShopContent() {
   const { token } = useAuthStore()
   const { setCart } = useCartStore()
   const router = useRouter()
@@ -280,5 +280,17 @@ export default function ShopPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function ShopPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50/50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2A4736]"></div>
+      </div>
+    }>
+      <ShopContent />
+    </Suspense>
   )
 }
