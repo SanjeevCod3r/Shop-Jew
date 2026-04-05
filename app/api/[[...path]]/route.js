@@ -55,6 +55,17 @@ function authenticateAdmin(handler) {
   };
 }
 
+/** Ensures price/stock are non-negative; normalizes trending flags for products. */
+function sanitizeProductBody(body) {
+  const price = Math.max(0, Number(body.price));
+  const stock = Math.max(0, Math.floor(Number(body.stock)));
+  if (!Number.isFinite(price)) throw new Error('Invalid price');
+  if (!Number.isFinite(stock)) throw new Error('Invalid stock');
+  const trending = Boolean(body.trending);
+  const trendingOrder = trending ? Math.max(0, Math.floor(Number(body.trendingOrder) || 0)) : 0;
+  return { ...body, price, stock, trending, trendingOrder };
+}
+
 export async function GET(request, { params }) {
   await initializeApp();
   const path = params?.path ? params.path.join('/') : '';
@@ -71,6 +82,14 @@ export async function GET(request, { params }) {
     }
 
     if (path === 'products') {
+      const trendingParam = searchParams.get('trending');
+      if (trendingParam === '1' || trendingParam === 'true') {
+        const limit = parseInt(searchParams.get('limit') || '8');
+        const products = await Product.find({ trending: true }).sort({ trendingOrder: 1, createdAt: -1 }).limit(limit);
+        const total = await Product.countDocuments({ trending: true });
+        return NextResponse.json({ products, pagination: { page: 1, limit, total, pages: Math.max(1, Math.ceil(total / limit)) } });
+      }
+
       const page = parseInt(searchParams.get('page') || '1');
       const limit = parseInt(searchParams.get('limit') || '12');
       const search = searchParams.get('search') || '';
@@ -257,17 +276,21 @@ export async function POST(request, { params }) {
       if (!product) return NextResponse.json({ error: 'Product not found' }, { status: 404 });
       if (product.stock < quantity) return NextResponse.json({ error: 'Insufficient stock' }, { status: 400 });
 
+      const normalizedSize = size === undefined || size === null || size === '' ? null : String(size);
+      const needsSize =
+        (product.ringSizes && product.ringSizes.length > 0) ||
+        (product.category || '').toLowerCase().includes('ring');
+      if (needsSize && normalizedSize == null) {
+        return NextResponse.json({ error: 'Please select a size for this piece' }, { status: 400 });
+      }
+
       if (user) {
         let cart = await Cart.findOne({ userId: user.userId });
         if (!cart) cart = await Cart.create({ userId: user.userId, items: [] });
-
-        const normalizedSize = size || null;
         const existingItemIndex = cart.items.findIndex(item => {
           const sameProduct = item.productId.toString() === productId;
-          // treat null, undefined, empty string all as "no size"
-          const itemSize = item.size || null;
-          const sameSize = itemSize === normalizedSize;
-          return sameProduct && sameSize;
+          const itemSize = item.size == null || item.size === '' ? null : String(item.size);
+          return sameProduct && itemSize === normalizedSize;
         });
 
         if (existingItemIndex > -1) {
@@ -319,7 +342,13 @@ export async function POST(request, { params }) {
 
     if (path === 'admin/products') {
       return authenticateAdmin(async (req, ctx) => {
-        const product = await Product.create(body);
+        let payload;
+        try {
+          payload = sanitizeProductBody(body);
+        } catch (e) {
+          return NextResponse.json({ error: e.message || 'Invalid product data' }, { status: 400 });
+        }
+        const product = await Product.create(payload);
         return NextResponse.json({ message: 'Product created', product }, { status: 201 });
       })(request, { params });
     }
@@ -378,10 +407,15 @@ export async function PUT(request, { params }) {
 
     if (path === 'cart') {
       return authenticate(async (req, ctx) => {
-        const { productId, quantity } = body;
+        const { productId, quantity, size } = body;
+        const normalizedSize = size === undefined || size === null || size === '' ? null : String(size);
         const cart = await Cart.findOne({ userId: ctx.user.userId });
         if (!cart) return NextResponse.json({ error: 'Cart not found' }, { status: 404 });
-        const itemIndex = cart.items.findIndex(item => item.productId.toString() === productId);
+        const itemIndex = cart.items.findIndex((item) => {
+          const sameProduct = item.productId.toString() === productId;
+          const itemSize = item.size == null || item.size === '' ? null : String(item.size);
+          return sameProduct && itemSize === normalizedSize;
+        });
         if (itemIndex === -1) return NextResponse.json({ error: 'Item not in cart' }, { status: 404 });
         if (quantity <= 0) cart.items.splice(itemIndex, 1);
         else cart.items[itemIndex].quantity = quantity;
@@ -401,7 +435,13 @@ export async function PUT(request, { params }) {
     if (path.startsWith('admin/products/')) {
       const productId = path.split('/')[2];
       return authenticateAdmin(async (req, ctx) => {
-        const product = await Product.findByIdAndUpdate(productId, { ...body, updatedAt: Date.now() }, { new: true });
+        let payload;
+        try {
+          payload = sanitizeProductBody(body);
+        } catch (e) {
+          return NextResponse.json({ error: e.message || 'Invalid product data' }, { status: 400 });
+        }
+        const product = await Product.findByIdAndUpdate(productId, { ...payload, updatedAt: Date.now() }, { new: true });
         return product ? NextResponse.json({ message: 'Product updated', product }) : NextResponse.json({ error: 'Product not found' }, { status: 404 });
       })(request, { params });
     }
@@ -445,9 +485,25 @@ export async function DELETE(request, { params }) {
     if (path.startsWith('cart/')) {
       const productId = path.split('/')[1];
       return authenticate(async (req, ctx) => {
+        const { searchParams } = new URL(req.url);
+        const sizeSpecified = searchParams.has('size');
+        const raw = searchParams.get('size');
+        const normalizedSize = !sizeSpecified
+          ? undefined
+          : raw === null || raw === ''
+            ? null
+            : String(raw);
         const cart = await Cart.findOne({ userId: ctx.user.userId });
         if (!cart) return NextResponse.json({ error: 'Cart not found' }, { status: 404 });
-        cart.items = cart.items.filter(item => item.productId.toString() !== productId);
+        if (!sizeSpecified) {
+          cart.items = cart.items.filter((item) => item.productId.toString() !== productId);
+        } else {
+          cart.items = cart.items.filter((item) => {
+            if (item.productId.toString() !== productId) return true;
+            const itemSize = item.size == null || item.size === '' ? null : String(item.size);
+            return itemSize !== normalizedSize;
+          });
+        }
         await cart.save();
         await cart.populate('items.productId');
         return NextResponse.json({ message: 'Item removed from cart', cart });

@@ -50,6 +50,14 @@ const ProductSchema = new mongoose.Schema({
     required: true,
     default: 0,
   },
+  trending: {
+    type: Boolean,
+    default: false,
+  },
+  trendingOrder: {
+    type: Number,
+    default: 0,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

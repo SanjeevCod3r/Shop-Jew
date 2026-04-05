@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuthStore, useCartStore } from '@/lib/store'
+import { isValidEmail, isValidIndianPhone, normalizeIndianPhone } from '@/lib/validation'
 import { toast } from 'sonner'
 import { ArrowLeft, CreditCard, Shield, Tag, X } from 'lucide-react'
 
@@ -24,6 +25,7 @@ export default function CheckoutPage() {
   const [applyingCoupon, setApplyingCoupon] = useState(false)
   const [address, setAddress] = useState({
     name: user?.name || '',
+    email: user?.email || '',
     phone: '',
     street: '',
     city: '',
@@ -42,6 +44,16 @@ export default function CheckoutPage() {
     fetchCart();
     loadRazorpayScript();
   }, [hydrated, token, router]);
+
+  useEffect(() => {
+    if (user?.name != null || user?.email) {
+      setAddress((prev) => ({
+        ...prev,
+        name: prev.name || user?.name || '',
+        email: prev.email || user?.email || ''
+      }))
+    }
+  }, [user?.name, user?.email])
 
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
@@ -116,11 +128,21 @@ export default function CheckoutPage() {
 
 
   const handlePayment = async () => {
-    // Validate address
-    if (!address.name || !address.phone || !address.street || !address.city || !address.state || !address.zipCode) {
+    if (!address.name || !address.email?.trim() || !address.phone || !address.street || !address.city || !address.state || !address.zipCode) {
       toast.error('Please fill all address fields')
       return
     }
+    if (!isValidEmail(address.email)) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+    if (!isValidIndianPhone(address.phone)) {
+      toast.error('Please enter a valid 10-digit Indian mobile number')
+      return
+    }
+
+    const phoneDigits = normalizeIndianPhone(address.phone)
+    const addressForOrder = { ...address, phone: phoneDigits, email: address.email.trim() }
 
     setProcessing(true)
 
@@ -178,7 +200,7 @@ export default function CheckoutPage() {
                   discount: discount,
                   couponCode: appliedCoupon?.code || null,
                   finalAmount: finalAmount,
-                  address: address
+                  address: addressForOrder
                 }
               })
             })
@@ -200,7 +222,8 @@ export default function CheckoutPage() {
         },
         prefill: {
           name: address.name,
-          contact: address.phone
+          email: address.email.trim(),
+          contact: phoneDigits
         },
         theme: {
           color: '#2563eb'
@@ -277,11 +300,25 @@ export default function CheckoutPage() {
                     <Input
                       id="phone"
                       type="tel"
+                      inputMode="numeric"
+                      autoComplete="tel"
+                      placeholder="10-digit mobile (e.g. 9876543210)"
                       value={address.phone}
                       onChange={(e) => setAddress({ ...address, phone: e.target.value })}
                       required
                     />
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    value={address.email}
+                    onChange={(e) => setAddress({ ...address, email: e.target.value })}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="street">Street Address *</Label>

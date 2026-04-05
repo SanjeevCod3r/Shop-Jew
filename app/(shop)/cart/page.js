@@ -9,24 +9,34 @@ import { useAuthStore, useCartStore } from '@/lib/store'
 import { toast } from 'sonner'
 import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, ArrowRight, ShieldCheck, Truck, RefreshCcw } from 'lucide-react'
 
+function cartLineSize(item) {
+  return item.size == null || item.size === '' ? null : String(item.size)
+}
+
+function cartLineKey(item) {
+  const pid = item.productId?._id || item.productId
+  return `${String(pid)}::${cartLineSize(item) ?? '_'}`
+}
+
 export default function CartPage() {
   const router = useRouter()
-  const { user, token, hydrated } = useAuthStore()
-  const { cartItems, setCart, clearCart } = useCartStore()
-  const [cart, setLocalCart] = useState(null)
+  const { token, hydrated: authHydrated } = useAuthStore()
+  const { cartItems, setCart, updateQuantity: storeUpdateQuantity, removeItem: storeRemoveItem, hydrated: cartHydrated } = useCartStore()
+  const [localCart, setLocalCart] = useState(null)
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
 
+  const cart = token ? localCart : { items: cartItems || [] }
+
   useEffect(() => {
-    if (!hydrated) return;
-    
-    // Web doesn't require auth for cart, but we fetch from server if logged in
+    if (!authHydrated || !cartHydrated) return;
+
     if (token) {
       fetchCart();
     } else {
       setLoading(false);
     }
-  }, [hydrated, token]);
+  }, [authHydrated, cartHydrated, token]);
 
   const fetchCart = async () => {
     try {
@@ -45,9 +55,17 @@ export default function CartPage() {
     }
   }
 
-  const updateQuantity = async (productId, newQuantity) => {
+  const updateQuantity = async (item, newQuantity) => {
     if (newQuantity < 1) return
-    
+    const productId = item.productId?._id || item.productId
+    const size = cartLineSize(item)
+
+    if (!token) {
+      storeUpdateQuantity(productId, newQuantity, size)
+      toast.success('Cart updated')
+      return
+    }
+
     setUpdating(true)
     try {
       const response = await fetch('/api/cart', {
@@ -56,7 +74,7 @@ export default function CartPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ productId, quantity: newQuantity })
+        body: JSON.stringify({ productId, quantity: newQuantity, size })
       })
 
       const data = await response.json()
@@ -74,10 +92,20 @@ export default function CartPage() {
     }
   }
 
-  const removeItem = async (productId) => {
+  const removeItem = async (item) => {
+    const productId = item.productId?._id || item.productId
+    const size = cartLineSize(item)
+    const sizeQuery = size == null ? 'size=' : `size=${encodeURIComponent(size)}`
+
+    if (!token) {
+      storeRemoveItem(productId, size)
+      toast.success('Item removed from cart')
+      return
+    }
+
     setUpdating(true)
     try {
-      const response = await fetch(`/api/cart/${productId}`, {
+      const response = await fetch(`/api/cart/${productId}?${sizeQuery}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -155,8 +183,17 @@ export default function CartPage() {
           <div className="grid lg:grid-cols-3 gap-7 md:gap-12">
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-5 md:space-y-8">
+              {!token && (
+                <p className="text-sm text-gray-600 bg-amber-50 border border-amber-200/80 rounded-2xl px-4 py-3">
+                  You are not signed in. Your bag is saved on this device only.{' '}
+                  <Link href="/login" className="font-semibold text-[#2A4537] underline underline-offset-2">
+                    Sign in
+                  </Link>{' '}
+                  to sync your cart and checkout.
+                </p>
+              )}
               {cart.items.map((item) => (
-                <Card key={item._id} className="rounded-[24px] md:rounded-[40px] border border-gray-100 shadow-xl overflow-hidden group hover:border-[#C5A028] transition-all duration-500">
+                <Card key={item._id || cartLineKey(item)} className="rounded-[24px] md:rounded-[40px] border border-gray-100 shadow-xl overflow-hidden group hover:border-[#C5A028] transition-all duration-500">
                   <CardContent className="p-5 md:p-8">
                     <div className="flex flex-col sm:flex-row gap-5 md:gap-8">
                       <div className="w-full sm:w-40 h-44 sm:h-40 flex-shrink-0 bg-[#FDFDFD] rounded-[20px] md:rounded-[32px] overflow-hidden border border-gray-100 group-hover:scale-105 transition-transform duration-500 shadow-sm relative">
@@ -183,8 +220,8 @@ export default function CartPage() {
                             variant="ghost"
                             size="sm"
                             className="h-10 w-10 rounded-full text-black-300 hover:text-red-500 hover:bg-red-50 transition-all flex-shrink-0"
-                            onClick={() => removeItem(item.productId._id)}
-                            disabled={updating}
+                            onClick={() => removeItem(item)}
+                            disabled={updating && !!token}
                           >
                             <Trash2 className="h-5 w-5" />
                           </Button>
@@ -195,8 +232,8 @@ export default function CartPage() {
                             <Button
                               variant="ghost"
                               className="h-9 w-9 rounded-full text-[#111] hover:bg-white transition-all shadow-sm disabled:opacity-30"
-                              onClick={() => updateQuantity(item.productId._id, item.quantity - 1)}
-                              disabled={updating || item.quantity <= 1}
+                              onClick={() => updateQuantity(item, item.quantity - 1)}
+                              disabled={(updating && !!token) || item.quantity <= 1}
                             >
                               <Minus className="h-3 w-3" />
                             </Button>
@@ -204,8 +241,8 @@ export default function CartPage() {
                             <Button
                               variant="ghost"
                               className="h-9 w-9 rounded-full text-[#111] hover:bg-white transition-all shadow-sm disabled:opacity-30"
-                              onClick={() => updateQuantity(item.productId._id, item.quantity + 1)}
-                              disabled={updating || item.quantity >= (item.productId?.stock || 99)}
+                              onClick={() => updateQuantity(item, item.quantity + 1)}
+                              disabled={(updating && !!token) || item.quantity >= (item.productId?.stock || 99)}
                             >
                               <Plus className="h-3 w-3" />
                             </Button>

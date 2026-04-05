@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuthStore } from '@/lib/store'
+import { isValidEmail, isValidIndianPhone } from '@/lib/validation'
 import { toast } from 'sonner'
 import { User, Package, ArrowLeft, Edit, Save } from 'lucide-react'
 
@@ -22,6 +23,7 @@ export default function ProfilePage() {
   const [editing, setEditing] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
+    email: '',
     phone: '',
     address: {
       street: '',
@@ -53,6 +55,7 @@ export default function ProfilePage() {
         setProfile(data.user)
         setFormData({
           name: data.user.name || '',
+          email: data.user.email || '',
           phone: data.user.phone || '',
           address: data.user.address || {
             street: '',
@@ -85,6 +88,15 @@ export default function ProfilePage() {
   }
 
   const handleUpdateProfile = async () => {
+    if (!isValidEmail(formData.email)) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+    if (formData.phone.trim() && !isValidIndianPhone(formData.phone)) {
+      toast.error('Please enter a valid 10-digit Indian mobile number')
+      return
+    }
+
     try {
       const response = await fetch('/api/user/profile', {
         method: 'PUT',
@@ -92,7 +104,11 @@ export default function ProfilePage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          name: formData.name,
+          phone: formData.phone,
+          address: formData.address
+        })
       })
 
       const data = await response.json()
@@ -204,7 +220,8 @@ export default function ProfilePage() {
                     <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
-                      value={profile?.email}
+                      type="email"
+                      value={formData.email}
                       disabled
                       className="bg-gray-100"
                     />
@@ -214,6 +231,10 @@ export default function ProfilePage() {
                   <Label htmlFor="phone">Phone Number</Label>
                   <Input
                     id="phone"
+                    type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel"
+                    placeholder="10-digit mobile (e.g. 9876543210)"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     disabled={!editing}

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -88,6 +89,8 @@ export default function AdminPage() {
     material: "",
     design: "",
     set: "",
+    trending: false,
+    trendingOrder: "0",
   });
   const [showProductDialog, setShowProductDialog] = useState(false);
 
@@ -506,7 +509,24 @@ export default function AdminPage() {
     });
   };
 
+  const validateProductNumbers = () => {
+    const price = Number(productFormData.price);
+    const stock = Math.floor(Number(productFormData.stock));
+    if (!Number.isFinite(price) || price < 0) {
+      toast.error("Valuation (₹) must be zero or greater");
+      return null;
+    }
+    if (!Number.isFinite(stock) || stock < 0) {
+      toast.error("Available quantity must be zero or greater (whole number)");
+      return null;
+    }
+    return { price, stock };
+  };
+
   const handleAddProduct = async () => {
+    const nums = validateProductNumbers();
+    if (!nums) return;
+
     try {
       const imagesArray = productFormData.images
         .split(",")
@@ -519,6 +539,11 @@ export default function AdminPage() {
           .filter((n) => !isNaN(n))
         : [];
 
+      const trending = Boolean(productFormData.trending);
+      const trendingOrder = trending
+        ? Math.max(0, parseInt(String(productFormData.trendingOrder), 10) || 0)
+        : 0;
+
       const response = await fetch("/api/admin/products", {
         method: "POST",
         headers: {
@@ -527,10 +552,12 @@ export default function AdminPage() {
         },
         body: JSON.stringify({
           ...productFormData,
-          price: parseFloat(productFormData.price),
-          stock: parseInt(productFormData.stock),
+          price: nums.price,
+          stock: nums.stock,
           images: imagesArray,
           ringSizes: ringSizesArray,
+          trending,
+          trendingOrder,
         }),
       });
 
@@ -549,6 +576,9 @@ export default function AdminPage() {
   };
 
   const handleUpdateProduct = async () => {
+    const nums = validateProductNumbers();
+    if (!nums) return;
+
     try {
       const imagesArray = productFormData.images
         .split(",")
@@ -561,6 +591,11 @@ export default function AdminPage() {
           .filter((n) => !isNaN(n))
         : [];
 
+      const trending = Boolean(productFormData.trending);
+      const trendingOrder = trending
+        ? Math.max(0, parseInt(String(productFormData.trendingOrder), 10) || 0)
+        : 0;
+
       const response = await fetch(`/api/admin/products/${editingProduct}`, {
         method: "PUT",
         headers: {
@@ -569,10 +604,12 @@ export default function AdminPage() {
         },
         body: JSON.stringify({
           ...productFormData,
-          price: parseFloat(productFormData.price),
-          stock: parseInt(productFormData.stock),
+          price: nums.price,
+          stock: nums.stock,
           images: imagesArray,
           ringSizes: ringSizesArray,
+          trending,
+          trendingOrder,
         }),
       });
 
@@ -653,6 +690,12 @@ export default function AdminPage() {
       material: product.material || "",
       design: product.design || "",
       set: product.set || "",
+      trending: Boolean(product.trending),
+      trendingOrder: String(
+        product.trending && product.trendingOrder != null
+          ? product.trendingOrder
+          : 0
+      ),
     });
     setEditingProduct(product._id);
     setShowProductDialog(true);
@@ -672,6 +715,8 @@ export default function AdminPage() {
       material: "",
       design: "",
       set: "",
+      trending: false,
+      trendingOrder: "0",
     });
   };
 
@@ -1095,13 +1140,22 @@ export default function AdminPage() {
                         <Input
                           id="price"
                           type="number"
+                          min={0}
+                          step="0.01"
                           value={productFormData.price}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            if (v === "" || v === "-") {
+                              setProductFormData({ ...productFormData, price: v });
+                              return;
+                            }
+                            const n = Number(v);
+                            if (!Number.isNaN(n) && n < 0) return;
                             setProductFormData({
                               ...productFormData,
-                              price: e.target.value,
-                            })
-                          }
+                              price: v,
+                            });
+                          }}
                           placeholder="999"
                           className="rounded-2xl bg-gray-50 border-gray-100 p-6 text-[13px] font-black tracking-tighter focus:ring-2 focus:ring-[#C5A028] transition-all"
                         />
@@ -1116,13 +1170,22 @@ export default function AdminPage() {
                         <Input
                           id="stock"
                           type="number"
+                          min={0}
+                          step={1}
                           value={productFormData.stock}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            if (v === "" || v === "-") {
+                              setProductFormData({ ...productFormData, stock: v });
+                              return;
+                            }
+                            const n = Math.floor(Number(v));
+                            if (!Number.isFinite(n) || n < 0) return;
                             setProductFormData({
                               ...productFormData,
-                              stock: e.target.value,
-                            })
-                          }
+                              stock: String(n),
+                            });
+                          }}
                           placeholder="100"
                           className="rounded-2xl bg-gray-50 border-gray-100 p-6 text-[13px] font-black tracking-tight focus:ring-2 focus:ring-[#C5A028] transition-all"
                         />
@@ -1165,6 +1228,60 @@ export default function AdminPage() {
                           }
                           placeholder="e.g. Silver, Gold"
                           className="rounded-2xl bg-gray-50 border-gray-100 p-6 text-[13px] font-black tracking-tight focus:ring-2 focus:ring-[#C5A028] transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 rounded-2xl border border-gray-100 bg-gray-50/80 p-5">
+                      <div className="flex items-center gap-3">
+                        <Checkbox
+                          id="trending"
+                          checked={productFormData.trending}
+                          onCheckedChange={(checked) =>
+                            setProductFormData({
+                              ...productFormData,
+                              trending: Boolean(checked),
+                            })
+                          }
+                        />
+                        <Label
+                          htmlFor="trending"
+                          className="text-[11px] font-black uppercase tracking-widest cursor-pointer leading-none"
+                        >
+                          Homepage — Trending Products
+                        </Label>
+                      </div>
+                      <div className="flex flex-1 flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 sm:pl-6 sm:border-l border-gray-200">
+                        <Label
+                          htmlFor="trendingOrder"
+                          className="text-[10px] font-bold uppercase tracking-wider text-gray-500 whitespace-nowrap"
+                        >
+                          Display order (lower = first)
+                        </Label>
+                        <Input
+                          id="trendingOrder"
+                          type="number"
+                          min={0}
+                          step={1}
+                          disabled={!productFormData.trending}
+                          value={productFormData.trendingOrder}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            if (v === "") {
+                              setProductFormData({
+                                ...productFormData,
+                                trendingOrder: v,
+                              });
+                              return;
+                            }
+                            const n = parseInt(v, 10);
+                            if (Number.isNaN(n) || n < 0) return;
+                            setProductFormData({
+                              ...productFormData,
+                              trendingOrder: v,
+                            });
+                          }}
+                          className="max-w-[120px] rounded-xl bg-white border-gray-100"
                         />
                       </div>
                     </div>
@@ -1381,6 +1498,11 @@ export default function AdminPage() {
                       <Badge className="bg-white/90 backdrop-blur-md text-[#111] text-[9px] font-black px-4 py-2 rounded-full border border-gray-100 uppercase tracking-widest shadow-lg">
                         {product.category}
                       </Badge>
+                      {product.trending && (
+                        <Badge className="bg-[#C5A028] text-[#111] text-[9px] font-black px-4 py-2 rounded-full uppercase tracking-widest shadow-lg">
+                          Trending · #{product.trendingOrder ?? 0}
+                        </Badge>
+                      )}
                       {product.stock <= 5 && (
                         <Badge className="bg-red-500 text-white text-[9px] font-black px-4 py-2 rounded-full uppercase tracking-widest shadow-lg animate-pulse">
                           Critical Stock

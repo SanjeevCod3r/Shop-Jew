@@ -6,10 +6,11 @@ import { ChevronRight, Star, ShoppingBag, ArrowLeft, Filter, Grid, List } from '
 import { useAuthStore, useCartStore } from '@/lib/store'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import ListingAddToCartButton from '@/components/ListingAddToCartButton'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 function ShopContent() {
-  const { token } = useAuthStore()
+  const { token, hydrated: authHydrated } = useAuthStore()
   const { setCart } = useCartStore()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -70,36 +71,6 @@ function ShopContent() {
 
     return sorted
   }, [products, selectedMaxPrice, sortBy])
-
-  const addToCart = async (e, productId) => {
-    e.preventDefault()
-    if (!token) {
-      toast.error('Please login to add items to cart')
-      router.push('/login')
-      return
-    }
-
-    try {
-      const response = await fetch('/api/cart', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ productId, quantity: 1 })
-      })
-
-      const data = await response.json()
-      if (response.ok) {
-        toast.success('Added to cart!')
-        setCart(data.cart?.items || [])
-      } else {
-        toast.error(data.error || 'Failed to add to cart')
-      }
-    } catch (error) {
-      toast.error('Error adding to cart')
-    }
-  }
 
   return (
     <div className="min-h-screen bg-gray-50/50 overflow-x-hidden">
@@ -263,12 +234,39 @@ function ShopContent() {
                       {/* Price & Action */}
                       <div className="flex items-center justify-between mt-auto pt-3 md:pt-4 border-t border-gray-50 ">
                         <span className="text-base sm:text-lg md:text-2xl font-bold text-[#2A4537]">₹{p.price.toLocaleString()}</span>
-                        <button
-                          onClick={(e) => addToCart(e, p._id)}
-                           className="h-9 w-9 rounded-full bg-[#2A4736] flex items-center justify-center text-white shadow-md hover:scale-110 transition-transform"
-                        >
-                          <ShoppingBag className="h-5 w-5" />
-                        </button>
+                        <ListingAddToCartButton
+                          product={p}
+                          requireAuth
+                          authHydrated={authHydrated}
+                          authenticated={!!token}
+                          onUnauthenticated={() => {
+                            toast.error('Please login to add items to cart')
+                            router.push('/login')
+                          }}
+                          disabled={p.stock === 0}
+                          className="h-9 w-9 rounded-full bg-[#2A4736] flex items-center justify-center text-white shadow-md hover:scale-110 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                          onAdd={async (size) => {
+                            const response = await fetch('/api/cart', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                              },
+                              body: JSON.stringify({
+                                productId: p._id,
+                                quantity: 1,
+                                size: size == null ? null : String(size),
+                              }),
+                            })
+                            const data = await response.json()
+                            if (response.ok) {
+                              toast.success('Added to cart!')
+                              setCart(data.cart?.items || [])
+                            } else {
+                              toast.error(data.error || 'Failed to add to cart')
+                            }
+                          }}
+                        />
                       </div>
                     </div>
                   </Link>

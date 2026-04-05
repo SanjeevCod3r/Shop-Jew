@@ -12,7 +12,6 @@ import {
   Focus,
   CircleDot,
   Star,
-  ShoppingBag,
   ArrowLeft as ArrowLeftIcon,
   ArrowRight as ArrowRightIcon,
 } from "lucide-react";
@@ -20,6 +19,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { useAuthStore, useCartStore } from "@/lib/store";
 import { toast } from "sonner";
+import ListingAddToCartButton from "@/components/ListingAddToCartButton";
 
 // Representing sidebar categories
 const CATEGORIES_ICONS = {
@@ -113,7 +113,7 @@ export default function App() {
     try {
       setLoading(true);
       const [prodRes, newProdRes, blogRes] = await Promise.all([
-        fetch("/api/products?limit=8"),
+        fetch("/api/products?trending=1&limit=8"),
         fetch("/api/products?limit=4&sort=createdAt&order=desc"),
         fetch("/api/blogs?limit=3"),
       ]);
@@ -131,14 +131,10 @@ export default function App() {
     }
   };
 
-  const addToCart = async (e, product) => {
-    e.preventDefault();
-    
-    // Always add to local store first for immediate guest experience
-    addItem(product, 1);
+  const handleListingAdd = async (product, size) => {
+    const norm = size == null ? null : String(size);
+    addItem(product, 1, norm);
     toast.success("Added to cart!");
-
-    // If logged in, also sync with backend
     if (token) {
       try {
         const response = await fetch("/api/cart", {
@@ -147,12 +143,17 @@ export default function App() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ productId: product._id, quantity: 1 }),
+          body: JSON.stringify({
+            productId: product._id,
+            quantity: 1,
+            size: norm,
+          }),
         });
-
         const data = await response.json();
         if (response.ok) {
           setCart(data.cart?.items || []);
+        } else {
+          toast.error(data.error || "Could not sync cart");
         }
       } catch (error) {
         console.error("Error syncing cart to server:", error);
@@ -338,12 +339,12 @@ export default function App() {
                   <span className="font-bold text-[#2A4537] text-[13px] md:text-[15px]">
                     ₹{item.price.toLocaleString()}
                   </span>
-                  <button
-                    onClick={(e) => addToCart(e, item)}
-                    className="h-9 w-9 rounded-full bg-[#2A4736] flex items-center justify-center text-white"
-                  >
-                    <ShoppingBag className="h-4 w-4" />
-                  </button>
+                  <ListingAddToCartButton
+                    product={item}
+                    disabled={item.stock === 0}
+                    className="h-9 w-9 rounded-full bg-[#2A4736] flex items-center justify-center text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    onAdd={(size) => handleListingAdd(item, size)}
+                  />
                 </div>
               </Link>
             ))}
@@ -457,6 +458,18 @@ export default function App() {
               </div>
             ))}
           </div>
+        ) : products.length === 0 ? (
+          <div className="rounded-[20px] border border-dashed border-gray-200 bg-gray-50/80 py-16 px-6 text-center">
+            <p className="text-gray-600 text-sm max-w-md mx-auto mb-4">
+              No trending highlights right now. Explore the full collection in the shop.
+            </p>
+            <Link
+              href="/shop"
+              className="inline-flex items-center gap-1 text-sm font-medium text-[#2A4736] hover:underline"
+            >
+              Browse the shop <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {products.slice(0, 8).map((item) => (
@@ -490,14 +503,12 @@ export default function App() {
                   <span className="font-bold text-[#2A4537] text-[15px]">
                     ₹{item.price.toLocaleString()}
                   </span>
-                  <button
-                    onClick={(e) => addToCart(e, item)}
-                    className="h-9 w-9 rounded-full bg-[#2A4736] flex items-center justify-center text-white shadow-md hover:scale-110 transition-transform"
-                  >
-                    <ShoppingBag
-                      className="h-4 w-4"
-                    />
-                  </button>
+                  <ListingAddToCartButton
+                    product={item}
+                    disabled={item.stock === 0}
+                    className="h-9 w-9 rounded-full bg-[#2A4736] flex items-center justify-center text-white shadow-md hover:scale-110 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                    onAdd={(size) => handleListingAdd(item, size)}
+                  />
                 </div>
               </Link>
             ))}

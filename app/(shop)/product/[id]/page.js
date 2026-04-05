@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
+import useEmblaCarousel from "embla-carousel-react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -39,9 +40,36 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     if (params.id) {
+      setSelectedImage(0);
       fetchProduct();
     }
   }, [params.id]);
+
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: "start",
+    loop: false,
+    dragFree: false,
+    containScroll: "trimSnaps",
+  });
+
+  const scrollToSlide = useCallback(
+    (index) => {
+      emblaApi?.scrollTo(index);
+    },
+    [emblaApi]
+  );
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    const onSelect = () => setSelectedImage(emblaApi.selectedScrollSnap());
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
+    onSelect();
+    return () => {
+      emblaApi.off("select", onSelect);
+      emblaApi.off("reInit", onSelect);
+    };
+  }, [emblaApi]);
 
   const fetchProduct = async () => {
     try {
@@ -85,6 +113,10 @@ export default function ProductDetailPage() {
       router.push("/login");
       return;
     }
+    if (hasSizes && !selectedSize) {
+      toast.error("Please select a size");
+      return;
+    }
     try {
       const response = await fetch("/api/cart", {
         method: "POST",
@@ -114,6 +146,10 @@ export default function ProductDetailPage() {
     if (!token) {
       toast.error("Please login to add items to cart");
       router.push("/login");
+      return;
+    }
+    if (hasSizes && !selectedSize) {
+      toast.error("Please select a size");
       return;
     }
     try {
@@ -212,7 +248,8 @@ export default function ProductDetailPage() {
                 {displayImages.map((img, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setSelectedImage(idx)}
+                    type="button"
+                    onClick={() => scrollToSlide(idx)}
                     className={`relative w-24 h-24 rounded-[24px] overflow-hidden border-2 transition-all duration-300 ${
                       selectedImage === idx
                         ? "border-[#C5A028] scale-105 shadow-xl shadow-[#C5A028]/20"
@@ -229,17 +266,51 @@ export default function ProductDetailPage() {
                 ))}
               </div>
             )}
-            <div className="flex-1 relative aspect-[4/5] rounded-[40px] overflow-hidden bg-[#FDFDFD] border border-gray-100 group shadow-lg animate-in fade-in duration-1000">
-              <Image
-                src={displayImages[selectedImage]}
-                alt={product.title}
-                fill
-                className="w-full h-full object-contain p-12 transition-all duration-700 group-hover:scale-105"
-                priority
-              />
+            <div className="flex-1 relative rounded-[40px] overflow-hidden bg-[#FDFDFD] border border-gray-100 group shadow-lg animate-in fade-in duration-1000">
+              <div className="overflow-hidden aspect-[4/5]" ref={emblaRef}>
+                <div className="flex h-full">
+                  {displayImages.map((img, idx) => (
+                    <div
+                      key={idx}
+                      className="min-w-0 flex-[0_0_100%] relative h-full"
+                    >
+                      <Image
+                        src={img}
+                        alt={`${product.title} — view ${idx + 1}`}
+                        fill
+                        className="object-contain p-8 sm:p-12 select-none pointer-events-none"
+                        priority={idx === 0}
+                        sizes="(max-width: 1024px) 100vw, 50vw"
+                        draggable={false}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {displayImages.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Previous image"
+                    onClick={() => emblaApi?.scrollPrev()}
+                    className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-10 h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-white/90 backdrop-blur-md border border-gray-100 shadow-lg flex items-center justify-center text-gray-700 hover:bg-white hover:border-[#C5A028]/40 transition-all active:scale-95"
+                  >
+                    <ChevronLeft className="h-6 w-6" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Next image"
+                    onClick={() => emblaApi?.scrollNext()}
+                    className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-10 h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-white/90 backdrop-blur-md border border-gray-100 shadow-lg flex items-center justify-center text-gray-700 hover:bg-white hover:border-[#C5A028]/40 transition-all active:scale-95"
+                  >
+                    <ChevronRight className="h-6 w-6" />
+                  </button>
+                </>
+              )}
               <button
+                type="button"
                 onClick={() => setWishlisted(!wishlisted)}
-                className="absolute top-8 right-8 h-14 w-14 rounded-full bg-white/90 backdrop-blur-md border border-gray-100 flex items-center justify-center transition-all shadow-xl active:scale-90 group/heart"
+                className="absolute top-8 right-8 h-14 w-14 rounded-full bg-white/90 backdrop-blur-md border border-gray-100 flex items-center justify-center transition-all shadow-xl active:scale-90 group/heart z-10"
               >
                 <Heart
                   className={`h-6 w-6 transition-colors ${
@@ -249,18 +320,24 @@ export default function ProductDetailPage() {
                   }`}
                 />
               </button>
-              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
-                {displayImages.map((_, idx) => (
-                  <div
-                    key={idx}
-                    className={`h-1.5 transition-all duration-500 rounded-full ${
-                      selectedImage === idx
-                        ? "w-8 bg-[#C5A028]"
-                        : "w-2 bg-gray-200"
-                    }`}
-                  />
-                ))}
-              </div>
+              {displayImages.length > 1 && (
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                  {displayImages.map((_, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      aria-label={`Show image ${idx + 1}`}
+                      aria-current={selectedImage === idx ? "true" : undefined}
+                      onClick={() => scrollToSlide(idx)}
+                      className={`h-1.5 transition-all duration-500 rounded-full ${
+                        selectedImage === idx
+                          ? "w-8 bg-[#C5A028]"
+                          : "w-2 bg-gray-200 hover:bg-gray-300"
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -342,9 +419,6 @@ export default function ProductDetailPage() {
                         </span>
                       )}
                     </label>
-                    <button className="text-xs font-bold underline text-gray-500 underline-offset-4">
-                      Size Chart
-                    </button>
                   </div>
                   <div className="flex flex-wrap gap-2.5">
                     {displaySizes.map((size) => (
@@ -375,18 +449,20 @@ export default function ProductDetailPage() {
               <div className="flex gap-4 mb-10">
                 <button
                   className={`flex-1 h-14 bg-[#2A4537] hover:bg-[#C5A028] text-white hover:text-[#111] rounded-[16px] font-bold text-[14px] uppercase tracking-[0.2em] flex items-center justify-center transition-all shadow-xl active:scale-[0.98] ${
-                    product.stock === 0 ? "opacity-50 cursor-not-allowed" : ""
+                    product.stock === 0 || (hasSizes && !selectedSize) ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   onClick={buyNow}
-                  disabled={product.stock === 0}
+                  disabled={product.stock === 0 || (hasSizes && !selectedSize)}
                 >
                   Buy Now
                 </button>
 
                 <button
-                  className="flex-1 h-14 bg-transparent border-2 border-gray-200 hover:border-[#C5A028] text-[#111] rounded-[16px] font-bold text-[12px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                  className={`flex-1 h-14 bg-transparent border-2 border-gray-200 hover:border-[#C5A028] text-[#111] rounded-[16px] font-bold text-[12px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
+                    product.stock === 0 || (hasSizes && !selectedSize) ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                   onClick={addToCart}
-                  disabled={product.stock === 0}
+                  disabled={product.stock === 0 || (hasSizes && !selectedSize)}
                 >
                   <ShoppingCart className="h-4 w-4" />
                   {product.stock === 0 ? "Out of Stock" : "Add to Vault"}

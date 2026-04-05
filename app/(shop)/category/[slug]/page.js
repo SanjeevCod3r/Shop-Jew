@@ -4,15 +4,16 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ChevronRight, Star, ShoppingBag, ArrowLeft } from 'lucide-react'
+import { ChevronRight, Star, ArrowLeft } from 'lucide-react'
 import { useAuthStore, useCartStore } from '@/lib/store'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import ListingAddToCartButton from '@/components/ListingAddToCartButton'
 
 export default function CategoryPage() {
   const params = useParams()
   const router = useRouter()
-  const { token } = useAuthStore()
+  const { token, hydrated: authHydrated } = useAuthStore()
   const { setCart } = useCartStore()
 
   const [products, setProducts] = useState([])
@@ -41,37 +42,6 @@ export default function CategoryPage() {
       toast.error('Failed to load products')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const addToCart = async (e, productId) => {
-    e.preventDefault() // prevent navigating to product detail
-
-    if (!token) {
-      toast.error('Please login to add items to cart')
-      router.push('/login')
-      return
-    }
-
-    try {
-      const response = await fetch('/api/cart', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ productId, quantity: 1 })
-      })
-
-      const data = await response.json()
-      if (response.ok) {
-        toast.success('Added to cart!')
-        setCart(data.cart?.items || [])
-      } else {
-        toast.error(data.error || 'Failed to add to cart')
-      }
-    } catch (error) {
-      toast.error('Error adding to cart')
     }
   }
 
@@ -160,14 +130,39 @@ export default function CategoryPage() {
                         ₹{product.price.toFixed(2)}
                       </span>
 
-                      <button
-                        onClick={(e) => addToCart(e, product._id)}
+                      <ListingAddToCartButton
+                        product={product}
+                        requireAuth
+                        authHydrated={authHydrated}
+                        authenticated={!!token}
+                        onUnauthenticated={() => {
+                          toast.error('Please login to add items to cart')
+                          router.push('/login')
+                        }}
                         disabled={product.stock === 0}
-                        className={`h-9 w-9 rounded-full flex items-center justify-center transition-transform hover:scale-110 ${product.stock === 0 ? 'bg-gray-300' : 'bg-[#2A4736] hover:bg-[#1f3628]'} shadow-sm`}
-                        aria-label="Add to cart"
-                      >
-                        <ShoppingBag className="h-4 w-4 text-white" />
-                      </button>
+                        className={`h-9 w-9 rounded-full flex items-center justify-center transition-transform hover:scale-110 ${product.stock === 0 ? 'bg-gray-300' : 'bg-[#2A4736] hover:bg-[#1f3628]'} shadow-sm text-white disabled:cursor-not-allowed`}
+                        onAdd={async (size) => {
+                          const response = await fetch('/api/cart', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({
+                              productId: product._id,
+                              quantity: 1,
+                              size: size == null ? null : String(size),
+                            }),
+                          })
+                          const data = await response.json()
+                          if (response.ok) {
+                            toast.success('Added to cart!')
+                            setCart(data.cart?.items || [])
+                          } else {
+                            toast.error(data.error || 'Failed to add to cart')
+                          }
+                        }}
+                      />
                     </div>
                   </div>
                 </div>
